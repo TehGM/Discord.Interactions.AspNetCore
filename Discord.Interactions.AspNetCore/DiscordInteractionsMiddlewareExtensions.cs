@@ -40,6 +40,8 @@ namespace Microsoft.AspNetCore.Builder
             if (options.HandlePings)
                 app.UseMiddleware<DiscordPingHandlingMiddleware>();
 
+            app.UseAuthentication();
+
             return app;
         }
     }
