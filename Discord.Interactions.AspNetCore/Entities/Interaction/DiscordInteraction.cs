@@ -48,7 +48,7 @@ namespace TehGM.Discord.Interactions
         [JsonProperty("resolved", NullValueHandling = NullValueHandling.Ignore)]
         public DiscordInteractionResolvedData ResolvedData { get; private set; }
         [JsonProperty("options", NullValueHandling = NullValueHandling.Ignore)]
-        public IEnumerable<DiscordInteractionOption> Options { get; private set; }
+        public IEnumerable<DiscordInteractionDataOption> Options { get; private set; }
 
         [JsonConstructor]
         private DiscordInteractionData() { }
@@ -56,7 +56,7 @@ namespace TehGM.Discord.Interactions
         // OPTIONS RETRIEVAL
         private bool TryGetOption<T>(string key, out T value, Func<object, T> parser)
         {
-            DiscordInteractionOption option = this.Options.FirstOrDefault(o => o.Name.Equals(key, StringComparison.OrdinalIgnoreCase));
+            DiscordInteractionDataOption option = this.Options.FirstOrDefault(o => o.Name.Equals(key, StringComparison.OrdinalIgnoreCase));
             if (option == null || option.Value == null)
             {
                 value = default;

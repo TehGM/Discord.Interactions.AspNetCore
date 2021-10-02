@@ -2,7 +2,7 @@
 
 namespace TehGM.Discord.Interactions
 {
-    public class DiscordInteractionOption
+    public class DiscordInteractionDataOption
     {
         [JsonProperty("name", Required = Required.Always)]
         public string Name { get; private set; }
@@ -10,6 +10,6 @@ namespace TehGM.Discord.Interactions
         public object Value { get; private set; }
 
         [JsonConstructor]
-        private DiscordInteractionOption() { }
+        private DiscordInteractionDataOption() { }
     }
 }
