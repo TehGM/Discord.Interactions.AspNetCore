@@ -30,6 +30,7 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
 
         protected override void Configure(IApplicationBuilder app)
         {
+            app.UseMiddleware<DiscordInteractionReaderMiddleware>();
             app.UseMiddleware<DiscordSignatureVerificationMiddleware>();
         }
 

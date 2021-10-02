@@ -44,6 +44,7 @@ namespace Microsoft.AspNetCore.Builder
             if (app == null)
                 throw new ArgumentNullException(nameof(app));
 
+            app.UseMiddleware<DiscordInteractionReaderMiddleware>();
             app.UseMiddleware<DiscordSignatureVerificationMiddleware>();
             if (options.HandlePings)
                 app.UseMiddleware<DiscordPingHandlingMiddleware>();

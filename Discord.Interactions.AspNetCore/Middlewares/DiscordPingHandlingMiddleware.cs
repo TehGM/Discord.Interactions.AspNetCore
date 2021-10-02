@@ -1,8 +1,8 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace TehGM.Discord.Interactions.AspNetCore
@@ -29,35 +29,23 @@ namespace TehGM.Discord.Interactions.AspNetCore
         /// <summary>Invokes the middleware for given request context.</summary>
         /// <param name="context">The request context.</param>
         /// <returns></returns>
-        public async Task InvokeAsync(HttpContext context)
+        public Task InvokeAsync(HttpContext context)
         {
-            // enable buffering so the body can be read multiple times
-            context.Request.EnableBuffering();
+            JObject json = context.Features.Get<IDiscordInteractionReaderFeature>().InteractionJson;
 
-            using (StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8, leaveOpen: true,
-                detectEncodingFromByteOrderMarks: true, bufferSize: -1))    // defaults as of .NET 5
+            // if type == 1, respond with pong
+            if (json["type"].Value<int>() == (int)DiscordInteractionType.Ping)
             {
-                // parse body
-                string body = await reader.ReadToEndAsync().ConfigureAwait(false);
-                JObject json = JObject.Parse(body);
-                // reset stream position so it can be re-read in later middleware
-                context.Request.Body.Position = 0;
-
-                // if type == 1, respond with pong
-                if (json["type"].Value<int>() == (int)DiscordInteractionType.Ping)
-                {
-                    this._log.LogDebug("Discord interaction ping received, returning pong");
-                    context.Response.StatusCode = 200;
-                    await context.Response.WriteAsync(
-                        JObject.FromObject(DiscordInteractionResponse.Pong).ToString(Newtonsoft.Json.Formatting.None), 
-                        context.RequestAborted).ConfigureAwait(false);
-                    return;
-                }
+                this._log.LogDebug("Discord interaction ping received, returning pong");
+                context.Response.StatusCode = (int)HttpStatusCode.OK;
+                return context.Response.WriteAsync(
+                    JObject.FromObject(DiscordInteractionResponse.Pong).ToString(Formatting.None),
+                    context.RequestAborted);
             }
 
             // otherwise pass on
             this._log.LogTrace("Not a Discord interaction ping message");
-            await this._next.Invoke(context);
+            return this._next.Invoke(context);
         }
     }
 }
