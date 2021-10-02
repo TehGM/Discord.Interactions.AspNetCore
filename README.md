@@ -35,9 +35,9 @@ services.AddAuthentication()
     .AddDiscordInteractions();
 ```
 
-> Tip: Adding authentication is optional, but doing so will enable automatic User claims parsing whenever `[AuthorizeDiscordInteraction]` attribut is used.
+> Tip: Adding authentication is optional, but doing so will enable automatic User claims parsing whenever `[AuthorizeDiscordInteraction]` attribute is used.
 
-### Middlewares
+### Enabling Middlewares
 Next, add Discord Interactions middlewares. They'll do a few automatic steps for you, like required [Signature Verification](https://discord.com/developers/docs/interactions/receiving-and-responding#security-and-authorization), and also will automatically respond to Discord's ping messages.
 
 Add following code to your Configure method in Startup:
@@ -71,6 +71,7 @@ app.UseDiscordInteractions(options =>
     // remove default route
     options.Routes.Clear();
     // add your custom routes
+    // routes need to start with "/", otherwise they won't be recognized by the middleware
     options.Routes.Add("/api/v1/discord/interactions");
 });
 ```
@@ -105,7 +106,7 @@ If you want to have full control of which routes the middlewares run on, you nee
 `UseDiscordInteractions` by default automatically registers middleware that will handle [Discord Ping Interactions](https://discord.com/developers/docs/interactions/receiving-and-responding#receiving-an-interaction) for you. If you wish to disable it, set `HandlePings` property to false:
 ```csharp
 app.UseDiscordInteractions(options =>
-{}
+{
     options.HandlePings = false;
 });
 ```
