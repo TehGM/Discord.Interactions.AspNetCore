@@ -75,7 +75,7 @@ app.UseDiscordInteractions(options =>
     options.Routes.Add("/api/v1/discord/interactions");
 });
 ```
-You can add as many routes as you want. Note that it'll run signature verification on each specified route.
+You can add as many routes as you want. Note that it'll run signature verification on each specified route, so do not add routes that will be triggered from different sources than Discord.
 
 > Note: remember to update `[Route]` attribute in your controller.
 

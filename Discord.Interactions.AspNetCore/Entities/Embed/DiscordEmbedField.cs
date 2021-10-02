@@ -3,9 +3,13 @@ using Newtonsoft.Json;
 
 namespace TehGM.Discord
 {
+    /// <summary>Discord embed's field.</summary>
+    /// <seealso href="https://discord.com/developers/docs/resources/channel#embed-object-embed-field-structure"/>
     public class DiscordEmbedField
     {
+        /// <summary>Max length of fields's <see cref="Name"/>.</summary>
         public const int MaxNameLength = 256;
+        /// <summary>Max length of fields's <see cref="Value"/>.</summary>
         public const int MaxValueLength = 1024;
 
         [JsonProperty("name", Required = Required.Always)]
@@ -13,6 +17,9 @@ namespace TehGM.Discord
         [JsonProperty("value", Required = Required.Always)]
         private string _value;
 
+        /// <summary>The name of the field.</summary>
+        /// <exception cref="InvalidOperationException">The value is longer than <see cref="MaxNameLength"/>.</exception>
+        /// <exception cref="ArgumentNullException">The value is null or empty.</exception>
         [JsonIgnore]
         public string Name
         {
@@ -26,6 +33,9 @@ namespace TehGM.Discord
                 this._name = value;
             }
         }
+        /// <summary>The value of the field.</summary>
+        /// <exception cref="InvalidOperationException">The value is longer than <see cref="MaxValueLength"/>.</exception>
+        /// <exception cref="ArgumentNullException">The value is null or empty.</exception>
         [JsonIgnore]
         public string Value
         {
@@ -40,13 +50,26 @@ namespace TehGM.Discord
             }
         }
         [JsonProperty("inline", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? IsInline { get; set; }
+        private bool? _isInline;
+        /// <summary>Whether the field is inline.</summary>
+        [JsonIgnore]
+        public bool IsInline
+        {
+            get => this._isInline ?? false;
+            set => this._isInline = value;
+        }
 
+        /// <summary>Creates a new Discord Embed Field.</summary>
+        /// <param name="name">The name of the field.</param>
+        /// <param name="value">The value of the field.</param>
+        /// <param name="inline">Whether this field is inline.</param>
+        /// <exception cref="InvalidOperationException"><paramref name="name"/> or <paramref name="value"/> is of invalid length.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null or empty.</exception>
         public DiscordEmbedField(string name, string value, bool? inline = null)
         {
             this.Name = name;
             this.Value = value;
-            this.IsInline = inline;
+            this._isInline = inline;
         }
     }
 }

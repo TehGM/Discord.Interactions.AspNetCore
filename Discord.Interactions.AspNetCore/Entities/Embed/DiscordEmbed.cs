@@ -5,10 +5,15 @@ using Newtonsoft.Json.Converters;
 
 namespace TehGM.Discord
 {
+    /// <summary>A Discord embed.</summary>
+    /// <seealso href="https://discord.com/developers/docs/resources/channel#embed-object"/>
     public class DiscordEmbed
     {
+        /// <summary>Max length of embed's <see cref="Title"/>.</summary>
         public const int MaxTitleLength = 256;
+        /// <summary>Max length of embed's <see cref="Description"/>.</summary>
         public const int MaxDescriptionLength = 4096;
+        /// <summary>Max count of embed's <see cref="Fields"/>.</summary>
         public const int MaxFieldsCount = 25;
 
         [JsonProperty("title", NullValueHandling = NullValueHandling.Ignore)]
@@ -18,6 +23,8 @@ namespace TehGM.Discord
         [JsonProperty("fields", NullValueHandling = NullValueHandling.Ignore)]
         private ICollection<DiscordEmbedField> _fields;
 
+        /// <summary>The title of the embed.</summary>
+        /// <exception cref="InvalidOperationException">The value is longer than <see cref="MaxTitleLength"/>.</exception>
         [JsonIgnore]
         public string Title
         {
@@ -29,6 +36,8 @@ namespace TehGM.Discord
                 this._title = value;
             }
         }
+        /// <summary>The description of the embed.</summary>
+        /// <exception cref="InvalidOperationException">The value is longer than <see cref="MaxDescriptionLength"/>.</exception>
         [JsonIgnore]
         public string Description
         {
@@ -40,27 +49,39 @@ namespace TehGM.Discord
                 this._description = value;
             }
         }
+        /// <summary>type of embed (always "rich" for webhook embeds)</summary>
         [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
         [JsonConverter(typeof(StringEnumConverter), new object[] { true })]
         public DiscordEmbedType? Type { get; set; } = DiscordEmbedType.Rich;
+        /// <summary>url of embed</summary>
         [JsonProperty("url", NullValueHandling = NullValueHandling.Ignore)]
         public string URL { get; set; }
+        /// <summary>timestamp of embed content</summary>
         [JsonProperty("timestamp", NullValueHandling = NullValueHandling.Ignore)]
         public DateTimeOffset? Timestamp { get; set; }
+        /// <summary>color code of the embed</summary>
         [JsonProperty("color", NullValueHandling = NullValueHandling.Ignore)]
         public int? Color { get; set; }
+        /// <summary>Footer information.</summary>
         [JsonProperty("footer", NullValueHandling = NullValueHandling.Ignore)]
         public DiscordEmbedFooter Footer { get; set; }
+        /// <summary>Image information.</summary>
         [JsonProperty("image", NullValueHandling = NullValueHandling.Ignore)]
         public DiscordEmbedMedia Image { get; set; }
+        /// <summary>Thumbnail information.</summary>
         [JsonProperty("thumbnail", NullValueHandling = NullValueHandling.Ignore)]
         public DiscordEmbedMedia Thumbnail { get; set; }
+        /// <summary>Video information.</summary>
         [JsonProperty("video", NullValueHandling = NullValueHandling.Ignore)]
         public DiscordEmbedMedia Video { get; set; }
+        /// <summary>Provider information.</summary>
         [JsonProperty("provider", NullValueHandling = NullValueHandling.Ignore)]
         public DiscordEmbedProvider Provider { get; set; }
+        /// <summary>Author information.</summary>
         [JsonProperty("author", NullValueHandling = NullValueHandling.Ignore)]
         public DiscordEmbedAuthor Author { get; set; }
+        /// <summary>Collection of embed's fields.</summary>
+        /// <exception cref="InvalidOperationException">The count of fields is greater than <see cref="MaxFieldsCount"/>.</exception>
         [JsonIgnore]
         public ICollection<DiscordEmbedField> Fields
         {
@@ -73,6 +94,9 @@ namespace TehGM.Discord
             }
         }
 
+        /// <summary>Adds a field to the embed.</summary>
+        /// <param name="field">Field to add.</param>
+        /// <exception cref="InvalidOperationException">The count of fields is greater than <see cref="MaxFieldsCount"/>.</exception>
         public void AddField(DiscordEmbedField field)
         {
             if (this.Fields == null)
@@ -82,6 +106,11 @@ namespace TehGM.Discord
             this.Fields.Add(field);
         }
 
+        /// <summary>Adds a field to the embed.</summary>
+        /// <param name="name">Name of the field.</param>
+        /// <param name="value">Text value of the field.</param>
+        /// <param name="inline">Whether the field is inline.</param>
+        /// <exception cref="InvalidOperationException">The count of fields is greater than <see cref="MaxFieldsCount"/>.</exception>
         public void AddField(string name, string value, bool? inline = null)
             => this.AddField(new DiscordEmbedField(name, value, inline));
     }

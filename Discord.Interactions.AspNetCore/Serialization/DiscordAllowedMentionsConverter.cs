@@ -7,6 +7,10 @@ using Newtonsoft.Json.Linq;
 
 namespace TehGM.Discord.Serialization
 {
+    /// <summary>A special converter for <see cref="DiscordAllowedMentions"/> object that ensures the object is serialized in a way that is accepted by Discord servers.</summary>
+    /// <remarks>According to <see href="https://discord.com/developers/docs/resources/channel#allowed-mentions-object">Discord Documentation</see>, Discord server is pretty restrictive
+    /// when it comes to valid formats of allowed mentions objects. This converter is designed to ensure that the object is serialized properly, while still allowing <see cref="DiscordAllowedMentions"/>
+    /// to be quite flexible to use within C# realm.</remarks>
     public class DiscordAllowedMentionsConverter : JsonConverter
     {
         internal const string UsersPropertyName = "users";
@@ -14,9 +18,11 @@ namespace TehGM.Discord.Serialization
         internal const string ParsePropertyName = "parse";
         internal const string ReplyPropertyName = "replied_user";
 
+        /// <inheritdoc/>
         public override bool CanConvert(Type objectType)
             => typeof(DiscordAllowedMentions).IsAssignableFrom(objectType);
 
+        /// <inheritdoc/>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             // deserialize as-is - it's serialization that has some complexity
@@ -24,6 +30,7 @@ namespace TehGM.Discord.Serialization
             return token.ToObject(objectType, serializer);
         }
 
+        /// <inheritdoc/>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             JObject result = new JObject();

@@ -5,8 +5,12 @@ using TehGM.Discord.Interactions.AspNetCore;
 
 namespace Microsoft.AspNetCore.Builder
 {
+    /// <summary>Extension methods for adding Discord Interactions middlewares.</summary>
     public static class DiscordInteractionsMiddlewareExtensions
     {
+        /// <summary>Adds Discord Interactions middlewares to the pipeline.</summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/>.</param>
+        /// <returns>The <see cref="IApplicationBuilder"/>.</returns>
         public static IApplicationBuilder UseDiscordInteractions(this IApplicationBuilder app)
         {
             if (app == null)
@@ -16,6 +20,10 @@ namespace Microsoft.AspNetCore.Builder
             return app.UseDiscordInteractions(options);
         }
 
+        /// <summary>Adds Discord Interactions middlewares to the pipeline.</summary>
+        /// <param name="options">Instance of options used to configure Discord Interactions middlewares.</param>
+        /// <param name="app">The <see cref="IApplicationBuilder"/>.</param>
+        /// <returns>The <see cref="IApplicationBuilder"/>.</returns>
         public static IApplicationBuilder UseDiscordInteractions(this IApplicationBuilder app, DiscordInteractionsMiddlewareOptions options)
         {
             if (app == null)

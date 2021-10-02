@@ -2,7 +2,6 @@
 
 namespace TehGM.Discord.Interactions.AspNetCore.Authentication
 {
-    public class DiscordInteractionsAuthenticationOptions : AuthenticationSchemeOptions
-    {
-    }
+    /// <summary>Contains the options used by the <see cref="DiscordInteractionsAuthenticationHandler"/>.</summary>
+    public class DiscordInteractionsAuthenticationOptions : AuthenticationSchemeOptions { }
 }

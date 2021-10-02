@@ -11,11 +11,19 @@ using Newtonsoft.Json.Linq;
 
 namespace TehGM.Discord.Interactions.AspNetCore.Authentication
 {
+    /// <summary>Authentication handler that authenticates Discord users based on Discord Interaction data.</summary>
     public class DiscordInteractionsAuthenticationHandler : AuthenticationHandler<DiscordInteractionsAuthenticationOptions>
     {
+        /// <summary>Creates a new instance of the handler.</summary>
+        /// <param name="options"></param>
+        /// <param name="logger"></param>
+        /// <param name="encoder"></param>
+        /// <param name="clock"></param>
         public DiscordInteractionsAuthenticationHandler(IOptionsMonitor<DiscordInteractionsAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) :
             base(options, logger, encoder, clock) { }
 
+        /// <summary>Performs the authentication.</summary>
+        /// <returns>Result of the authentication.</returns>
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             // enable buffering so the body can be read multiple times

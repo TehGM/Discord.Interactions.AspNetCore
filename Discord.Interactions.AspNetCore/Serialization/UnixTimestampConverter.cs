@@ -4,20 +4,34 @@ using Newtonsoft.Json.Converters;
 
 namespace TehGM.Discord.Serialization
 {
+    /// <summary>A JSON converter for converting between DateTime and Unix timestamp (in seconds).</summary>
+    /// <remarks>This class also contains non-JSON static converting methods.</remarks>
     public class UnixTimestampConverter : DateTimeConverterBase
     {
+        /// <summary>Converts provided date and time value to unix timestamp (in seconds).</summary>
+        /// <param name="value">The value to convert to unix timestamp.</param>
+        /// <returns>Unix timestamp (in seconds).</returns>
         public static long ToUnixTimestamp(DateTime value)
         {
             double seconds = ((DateTime)value - DateTime.UnixEpoch).TotalSeconds;
             return (long)seconds;
         }
 
+        /// <summary>Converts provided date and time value to unix timestamp (in seconds).</summary>
+        /// <param name="value">The value to convert to unix timestamp.</param>
+        /// <returns>Unix timestamp (in seconds).</returns>
         public static long ToUnixTimestamp(DateTimeOffset value)
             => ToUnixTimestamp(value.UtcDateTime);
 
+        /// <summary>Converts provided unix timestamp (in seconds) to a date and time value.</summary>
+        /// <param name="value">Unix timestamp (in seconds).</param>
+        /// <returns>Date and time value.</returns>
         public static DateTime ToDateTime(long value)
             => DateTime.UnixEpoch.AddSeconds(value);
 
+        /// <summary>Converts provided unix timestamp (in seconds) to a date and time value.</summary>
+        /// <param name="value">Unix timestamp (in seconds).</param>
+        /// <returns>Date and time value.</returns>
         public static DateTimeOffset ToDateTimeOffset(long value)
             => DateTimeOffset.UnixEpoch.AddSeconds(value);
 
