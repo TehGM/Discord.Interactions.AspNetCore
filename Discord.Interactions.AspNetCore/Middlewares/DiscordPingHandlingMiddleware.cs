@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 
 namespace TehGM.Discord.Interactions.AspNetCore
@@ -47,11 +44,13 @@ namespace TehGM.Discord.Interactions.AspNetCore
                 context.Request.Body.Position = 0;
 
                 // if type == 1, respond with pong
-                if (json["type"].Value<int>() == 1)
+                if (json["type"].Value<int>() == (int)DiscordInteractionType.Ping)
                 {
                     this._log.LogDebug("Discord interaction ping received, returning pong");
                     context.Response.StatusCode = 200;
-                    await context.Response.WriteAsync("{ type: 1 }", context.RequestAborted).ConfigureAwait(false);
+                    await context.Response.WriteAsync(
+                        JObject.FromObject(DiscordInteractionResponse.Pong).ToString(Newtonsoft.Json.Formatting.None), 
+                        context.RequestAborted).ConfigureAwait(false);
                     return;
                 }
             }

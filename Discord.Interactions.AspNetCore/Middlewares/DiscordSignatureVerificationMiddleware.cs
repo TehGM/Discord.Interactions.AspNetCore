@@ -40,7 +40,7 @@ namespace TehGM.Discord.Interactions.AspNetCore
             if (!context.Request.Headers.TryGetValue("X-Signature-Ed25519", out StringValues signatureValues) ||
                 !context.Request.Headers.TryGetValue("X-Signature-Timestamp", out StringValues timestampValues))
             {
-                await RespondInvalidSignature().ConfigureAwait(false); ;
+                await RespondInvalidSignature().ConfigureAwait(false);
                 return;
             }
 
