@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>TehGM.Discord.Interactions</RootNamespace>
+    <PackageId>TehGM.Discord.Interactions.AspNetCore</PackageId>
+    <Authors>TehGM</Authors>
+    <Description>An ASP.NET Core library for enabling Discord Interactions support</Description>
+    <Copyright>Copyright (c) 2021 TehGM</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/TehGM/Discord.Interactions.AspNetCore</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TehGM/Discord.Interactions.AspNetCore</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>discord aspnetcore interaction slash command</PackageTags>
+    <Version>0.1.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="2.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="Sodium.Core" Version="1.1.0" />
+  </ItemGroup>
+
+</Project>
