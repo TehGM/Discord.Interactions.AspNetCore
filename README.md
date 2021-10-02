@@ -113,7 +113,11 @@ app.UseDiscordInteractions(options =>
 
 Note that if you do this, you will need to manually handle these interactions in your controller.
 
-## Contributing
+## Development
+### Known Issues
+- Message Components (for example, message buttons) aren't supported currently. Support is planned for future versions.
+
+### Contributing
 In case you want to report a bug or request a new feature, open a new [Issue](https://github.com/TehGM/Discord.Interactions.AspNetCore/issues).
 
 If you want to contribute a patch or update, fork repository, implement the change, and open a pull request.
