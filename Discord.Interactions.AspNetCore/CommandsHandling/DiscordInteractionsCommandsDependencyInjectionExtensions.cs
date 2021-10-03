@@ -24,6 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddSingleton<IDiscordInteractionCommandsProvider, DiscordInteractionCommandsProvider>();
             services.AddHttpClient<IDiscordHttpClient, DiscordHttpClient>();
+            services.TryAddTransient<IDiscordApplicationCommandsClient, DiscordApplicationCommandsClient>();
 
             return services;
         }
