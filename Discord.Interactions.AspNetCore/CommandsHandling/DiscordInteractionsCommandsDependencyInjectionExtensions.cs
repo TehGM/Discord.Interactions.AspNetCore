@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.Discord.Interactions;
 using TehGM.Discord.Interactions.CommandsHandling;
 using TehGM.Discord.Interactions.CommandsHandling.Services;
+using TehGM.Discord.Interactions.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -22,6 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.Configure(configureOptions);
 
             services.TryAddSingleton<IDiscordInteractionCommandsProvider, DiscordInteractionCommandsProvider>();
+            services.AddHttpClient<IDiscordHttpClient, DiscordHttpClient>();
 
             return services;
         }
