@@ -45,7 +45,7 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
         }
 
         [Test]
-        public async Task SignatureVerification_UnknownCommand_Fails()
+        public async Task InteractionCommands_UnknownCommand_Fails()
         {
             HttpClient client = base.Host.GetTestClient();
             JObject bodyJson = new JObject(
