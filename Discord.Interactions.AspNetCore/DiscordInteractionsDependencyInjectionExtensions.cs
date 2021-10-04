@@ -1,7 +1,11 @@
 ﻿using System;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.Discord.Interactions;
 using TehGM.Discord.Interactions.AspNetCore.Authentication;
+using TehGM.Discord.Interactions.CommandsHandling;
+using TehGM.Discord.Interactions.CommandsHandling.Services;
+using TehGM.Discord.Interactions.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -19,6 +23,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (configureOptions != null)
                 services.Configure(configureOptions);
+
+            services.TryAddSingleton<IDiscordInteractionCommandsProvider, DiscordInteractionCommandsProvider>();
+            services.AddHttpClient<IDiscordHttpClient, DiscordHttpClient>();
+            services.TryAddTransient<IDiscordApplicationCommandsClient, DiscordApplicationCommandsClient>();
+            services.TryAddTransient<IDiscordApplicationCommandsCreator, DiscordApplicationCommandsCreator>();
+            services.TryAddTransient<IDiscordInteractionCommandsLoader, DiscordInteractionCommandsLoader>();
+            services.AddHostedService<DiscordInteractionCommandsRegistrar>();
 
             return services;
         }

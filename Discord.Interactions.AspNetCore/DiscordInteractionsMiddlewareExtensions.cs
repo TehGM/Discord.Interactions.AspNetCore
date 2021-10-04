@@ -47,7 +47,8 @@ namespace Microsoft.AspNetCore.Builder
             app.UseMiddleware<DiscordInteractionReaderMiddleware>();
             app.UseMiddleware<DiscordSignatureVerificationMiddleware>();
             if (options.HandlePings)
-                app.UseMiddleware<DiscordPingHandlingMiddleware>();
+                app.UseMiddleware<DiscordPingHandlingMiddleware>(); 
+            app.UseMiddleware<DiscordInteractionCommandsMiddleware>();
 
             return app;
         }
