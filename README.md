@@ -176,7 +176,8 @@ public class DiscordInteractionsController : ControllerBase
         // interactions are handled by middlewares when they're ping or added commands
         if (interaction.Data.Name == "example")
         {
-            // run example code logic
+            // run example command logic
+            // use DiscordInteractionResponseBuilder to construct the response, and return it with Ok().
         }
     }
 }
