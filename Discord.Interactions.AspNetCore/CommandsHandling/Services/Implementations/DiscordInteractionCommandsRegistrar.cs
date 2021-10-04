@@ -130,7 +130,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
                 foreach (DiscordApplicationCommand registeredCmd in results)
                 {
                     IDiscordInteractionCommand cmd = commandNames[CommandKey.FromCommand(registeredCmd)];
-                    this._provider.RegisterCommand(registeredCmd.ID, cmd);
+                    this._provider.AddCommand(registeredCmd.ID, cmd);
                     this._log.LogDebug("Registered command {Name} with ID {ID}", registeredCmd.Name, registeredCmd.ID);
                 }
             }

@@ -11,13 +11,13 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
             this._commands = new Dictionary<ulong, IDiscordInteractionCommand>();
         }
 
-        public IDiscordInteractionCommand GetRegisteredCommand(ulong commandID)
+        public IDiscordInteractionCommand GetCommand(ulong commandID)
         {
             this._commands.TryGetValue(commandID, out IDiscordInteractionCommand result);
             return result;
         }
 
-        public void RegisterCommand(ulong commandID, IDiscordInteractionCommand handler)
+        public void AddCommand(ulong commandID, IDiscordInteractionCommand handler)
         {
             this._commands.Add(commandID, handler);
         }

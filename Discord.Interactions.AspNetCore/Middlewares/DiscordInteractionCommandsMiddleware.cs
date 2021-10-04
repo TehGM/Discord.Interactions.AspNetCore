@@ -47,7 +47,7 @@ namespace TehGM.Discord.Interactions.AspNetCore
             }
             // try to get command handler
             // if cannot, then also pass
-            IDiscordInteractionCommand cmd = this._commands.GetRegisteredCommand(commandID.Value);
+            IDiscordInteractionCommand cmd = this._commands.GetCommand(commandID.Value);
             if (cmd == null)
             {
                 await this._next.Invoke(context).ConfigureAwait(false);
