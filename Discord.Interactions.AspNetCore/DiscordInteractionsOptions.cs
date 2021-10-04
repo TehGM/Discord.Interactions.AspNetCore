@@ -20,6 +20,7 @@ namespace TehGM.Discord.Interactions
         /// <summary>The user agent to use when making requests to Discord API servers. Required for commands registration.</summary>
         public string UserAgent { get; set; } = $"Discord.Interactions.AspNetCore (v{GetVersion()})";
         /// <summary>The bot token to authenticate with when making requests to Discord API servers. Required for commands registration.</summary>
+        /// <seealso href="https://discord.com/developers/applications"/>
         public string BotToken { get; set; }
         /// <summary>Base API URL for API requests. Required for commands registration.</summary>
         public string BaseApiURL { get; set; } = "https://discord.com/api/v9/";
