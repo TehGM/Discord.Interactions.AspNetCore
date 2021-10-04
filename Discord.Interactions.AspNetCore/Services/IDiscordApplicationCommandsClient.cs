@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TehGM.Discord.Interactions.Services
+namespace TehGM.Discord.Interactions
 {
     /// <summary>Represents a Discord API client that can register application commands.</summary>
     public interface IDiscordApplicationCommandsClient
