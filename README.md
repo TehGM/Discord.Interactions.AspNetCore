@@ -63,6 +63,9 @@ public PingCommand : IDiscordInteractionCommand
 }
 ```
 
+#### Disposable Commands
+If your command implements `IDisposable`, its `Dispose()` method will be called by [IDiscordInteractionCommandsProvider](Discord.Interactions.AspNetCore/CommandsHandling/Services/IDiscordInteractionCommandsProvider.cs) when it's being disposed by the host.
+
 ### Using existing Application Commands
 If you want to re-use commands you registered previously, you can simply add them to [IDiscordInteractionCommandsProvider](Discord.Interactions.AspNetCore/CommandsHandling/Services/IDiscordInteractionCommandsProvider.cs). You can do it by, for example, using [IHostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
 
