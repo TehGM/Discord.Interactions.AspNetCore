@@ -17,4 +17,5 @@
         bool RemoveCommand(ulong commandID);
         /// <summary>Removes all commands from the provider.</summary>
         void Clear();
+    }
 }
