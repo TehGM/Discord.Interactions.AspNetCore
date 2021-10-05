@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.Discord.Interactions;
 using TehGM.Discord.Interactions.AspNetCore.Authentication;
 using TehGM.Discord.Interactions.CommandsHandling;
+using TehGM.Discord.Interactions.CommandsHandling.Registration;
+using TehGM.Discord.Interactions.CommandsHandling.Registration.Services;
 using TehGM.Discord.Interactions.CommandsHandling.Services;
 using TehGM.Discord.Interactions.Services;
 
@@ -33,7 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddHttpClient<IDiscordHttpClient, DiscordHttpClient>();
             services.TryAddTransient<IDiscordApplicationCommandsClient, DiscordApplicationCommandsClient>();
 
-            // loading and registering
+            // registration services
             services.TryAddTransient<IDiscordInteractionCommandBuilder, DiscordInteractionCommandBuilder>();
             services.TryAddTransient<IDiscordInteractionCommandsLoader, DiscordInteractionCommandsLoader>();
             services.AddHostedService<DiscordInteractionCommandsRegistrar>();

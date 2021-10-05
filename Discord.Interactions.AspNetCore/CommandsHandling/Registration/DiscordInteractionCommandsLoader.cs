@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 
-namespace TehGM.Discord.Interactions.CommandsHandling.Services
+namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
 {
     class DiscordInteractionCommandsLoader : IDiscordInteractionCommandsLoader
     {

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace TehGM.Discord.Interactions.CommandsHandling.Services
+namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
 {
     class DiscordInteractionCommandsRegistrar : IHostedService
     {

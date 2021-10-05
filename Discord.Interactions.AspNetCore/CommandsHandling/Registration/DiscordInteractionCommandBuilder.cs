@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TehGM.Discord.Interactions.CommandsHandling.Services
+namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
 {
     /// <inheritdoc/>
     public class DiscordInteractionCommandBuilder : IDiscordInteractionCommandBuilder

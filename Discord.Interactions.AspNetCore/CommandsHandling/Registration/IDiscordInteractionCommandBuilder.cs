@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TehGM.Discord.Interactions.CommandsHandling
+namespace TehGM.Discord.Interactions.CommandsHandling.Registration
 {
     /// <summary>Builds <see cref="DiscordApplicationCommand"/> from given type.</summary>
     public interface IDiscordInteractionCommandBuilder
