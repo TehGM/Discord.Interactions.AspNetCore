@@ -50,7 +50,6 @@ The commands, or rather their handlers, are classes that implement [IDiscordInte
 Note that implementation of this method should be lightweight, as Discord server will cancel the interaction after 3 seconds.
 
 ```csharp
-// example code for slash command /ping
 public class PingCommandHandler : IDiscordInteractionCommandHandler
 {
     public async Task<DiscordInteractionResponse> InvokeAsync(DiscordInteraction message, HttpRequest request, CancellationToken cancellationToken)
@@ -64,10 +63,9 @@ public class PingCommandHandler : IDiscordInteractionCommandHandler
 ```
 
 #### Dependency Injection
-Commands fully support dependency injection via constructor, like other ASP.NET Core services. Commands with [scoped lifetime](#handler-lifetime) will receive services scoped to the interaction's request.
+Command handlers fully support dependency injection via constructor, like other ASP.NET Core services. Handlers with [scoped lifetime](#handler-lifetime) will receive services scoped to the interaction's request.
 
 ```csharp
-// example code for slash command /ping
 public class PingCommandHandler : IDiscordInteractionCommandHandler
 {
     private readonly ILogger _log;
@@ -85,7 +83,6 @@ public class PingCommandHandler : IDiscordInteractionCommandHandler
 By default, every command handler has scoped lifetime, which should be perfect for most use cases. If you need to change the lifetime of your handler, you can do it with [\[InteractionCommandLifetime\]](Discord.Interactions.AspNetCore/CommandsHandling/InteractionCommandLifetimeAttribute.cs) attribute.
 
 ```csharp
-// example code for slash command /ping
 [InteractionCommandLifetime(ServiceLifetime.Singleton)]
 public class PingCommandHandler : IDiscordInteractionCommandHandler
 {
@@ -95,8 +92,6 @@ public class PingCommandHandler : IDiscordInteractionCommandHandler
 
 #### Disposable Handlers
 If your handler implements `IDisposable`, its `Dispose()` method will be called by [DiscordInteractionCommandHandlerCache](Discord.Interactions.AspNetCore/CommandsHandling/Services/Implementations/DiscordInteractionCommandHandlerCache.cs) when it's being disposed by the host - at the end of the request scope for scoped and transient handlers, during application shutdown for singleton ones.
-
-> Note: commands removed by manually calling `RemoveCommand()` or `Clear()` will not be disposed by the provider. Please dispose them manually if needed.
 
 ### Using existing Application Commands
 If you want to re-use commands you registered previously, you can simply add them to [IDiscordInteractionCommandHandlerFactory](Discord.Interactions.AspNetCore/CommandsHandling/Services/IDiscordInteractionCommandHandlerFactory.cs). You can do it by, for example, using [IHostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
@@ -157,7 +152,7 @@ public class PingCommandHandler : IDiscordInteractionCommandHandler
 }
 ```
 
-If you want to register a command that is more complex than just name and description, create a new **static** method that returns either `DiscordApplicationCommand` or `Task<DiscordApplicationCommand>`, and mark it with [\[InteractionCommandBuilder\]](Discord.Interactions.AspNetCore/CommandsHandling/InteractionCommandBuilderAttribute.cs) attribute. You can inject any non-scoped service into its arguments, as well as `IServiceProvider`and `CancellationToken`.  
+If you want to register a command that supports options or requires more complex logic, create a new ***static*** method that returns either `DiscordApplicationCommand` or `Task<DiscordApplicationCommand>`, and mark it with [\[InteractionCommandBuilder\]](Discord.Interactions.AspNetCore/CommandsHandling/InteractionCommandBuilderAttribute.cs) attribute. You can inject any non-scoped service into its arguments, as well as `IServiceProvider`and `CancellationToken`.  
 Note that [\[InteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/InteractionCommandAttribute.cs) attribute will then be ignored, so you can remove it.
 
 ```csharp
@@ -276,6 +271,7 @@ Please note that this library is primarily designed for personal use. I do not g
 
 ### Known Issues
 - Message Components (for example, message buttons) aren't supported currently. Support is planned for future versions.
+- [Followup Messages](https://discord.com/developers/docs/interactions/receiving-and-responding#followup-messages) aren't supported yet, but are planned.
 
 ### Contributing
 In case you want to report a bug or request a new feature, open a new [Issue](https://github.com/TehGM/Discord.Interactions.AspNetCore/issues).
