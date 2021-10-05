@@ -69,10 +69,9 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
                 return null;
             }
 
-            public void AddCommand(ulong commandID, IDiscordInteractionCommand handler)
-            {
-                throw new NotImplementedException();
-            }
+            public void AddCommand(ulong commandID, IDiscordInteractionCommand handler) => throw new NotImplementedException();
+            public bool RemoveCommand(ulong commandID) => throw new NotImplementedException();
+            public void Clear() => throw new NotImplementedException();
         }
 
         private class TestInteractionCommand : IDiscordInteractionCommand
