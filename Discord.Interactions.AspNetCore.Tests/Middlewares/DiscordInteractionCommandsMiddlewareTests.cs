@@ -76,7 +76,7 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
 
         private class TestInteractionCommand : IDiscordInteractionCommand
         {
-            public Task<DiscordInteractionResponse> InvokeAsync(DiscordInteraction message, HttpRequest request, IServiceProvider services, CancellationToken cancellationToken)
+            public Task<DiscordInteractionResponse> InvokeAsync(DiscordInteraction message, HttpRequest request, CancellationToken cancellationToken)
             {
                 return Task.FromResult(new DiscordInteractionResponseBuilder().Build());
             }

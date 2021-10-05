@@ -16,7 +16,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
             this._log = log;
         }
 
-        public IEnumerable<IDiscordInteractionCommand> LoadFromAssembly(Assembly assembly)
+        public IEnumerable<TypeInfo> LoadFromAssembly(Assembly assembly)
         {
             _log?.LogTrace("Loading assembly {Name}", assembly.FullName);
             IEnumerable<TypeInfo> types = assembly.DefinedTypes.Where(t => !t.IsAbstract && !t.ContainsGenericParameters
@@ -24,19 +24,10 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
             if (!types.Any())
             {
                 _log?.LogWarning("Cannot load commands from assembly {Name} - no non-static non-abstract non-generic classes implementing {Type} interface", assembly.FullName, nameof(IDiscordInteractionCommand));
-                return Enumerable.Empty<IDiscordInteractionCommand>();
+                return Enumerable.Empty<TypeInfo>();
             }
 
-            return types.Select(t => this.LoadFromType(t));
-        }
-
-        public IDiscordInteractionCommand LoadFromType(TypeInfo type)
-        {
-            if (!typeof(IDiscordInteractionCommand).IsAssignableFrom(type))
-                throw new ArgumentException($"Type {type.FullName} does not implement {nameof(IDiscordInteractionCommand)} interface.", nameof(type));
-
-            _log?.LogTrace("Loading type {Type}", type.FullName);
-            return (IDiscordInteractionCommand)Activator.CreateInstance(type, true);
+            return types;
         }
     }
 }

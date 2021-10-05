@@ -7,8 +7,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling
     public interface IBuildableDiscordInteractionCommand
     {
         /// <summary>Builds an application command.</summary>
-        /// <param name="services">Service provider that can be used to retrieve services required for command building.</param>
         /// <returns>The built application command.</returns>
-        DiscordApplicationCommand Build(IServiceProvider services);
+        DiscordApplicationCommand Build();
     }
 }

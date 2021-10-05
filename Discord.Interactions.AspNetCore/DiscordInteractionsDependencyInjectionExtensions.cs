@@ -24,10 +24,16 @@ namespace Microsoft.Extensions.DependencyInjection
             if (configureOptions != null)
                 services.Configure(configureOptions);
 
-            services.TryAddSingleton<IDiscordInteractionCommandsProvider, DiscordInteractionCommandsProvider>();
+            // handlers
+            services.TryAddSingleton<IDiscordInteractionCommandHandlerFactory, DiscordInteractionCommandHandlerFactory>();
+            services.TryAddSingleton<DiscordInteractionCommandHandlerCache>();
+            services.TryAddScoped<IDiscordInteractionCommandsProvider, DiscordInteractionCommandsProvider>();
+
+            // application commands
             services.AddHttpClient<IDiscordHttpClient, DiscordHttpClient>();
             services.TryAddTransient<IDiscordApplicationCommandsClient, DiscordApplicationCommandsClient>();
-            services.TryAddTransient<IDiscordApplicationCommandsCreator, DiscordApplicationCommandsCreator>();
+
+            // loading and registering
             services.TryAddTransient<IDiscordInteractionCommandsLoader, DiscordInteractionCommandsLoader>();
             services.AddHostedService<DiscordInteractionCommandsRegistrar>();
 

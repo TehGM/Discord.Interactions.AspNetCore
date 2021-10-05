@@ -56,7 +56,7 @@ namespace TehGM.Discord.Interactions.AspNetCore
 
             // command was found, so invoke it, and return the message
             this._log.LogDebug("Invoking command {ID}", commandID.Value);
-            DiscordInteractionResponse response = await cmd.InvokeAsync(feature.Interaction, context.Request, context.RequestServices, context.RequestAborted).ConfigureAwait(false);
+            DiscordInteractionResponse response = await cmd.InvokeAsync(feature.Interaction, context.Request, context.RequestAborted).ConfigureAwait(false);
             context.Response.StatusCode = (int)HttpStatusCode.OK;
             await context.Response.WriteAsync(JObject.FromObject(response).ToString(Formatting.None), context.RequestAborted).ConfigureAwait(false);
         }
