@@ -7,7 +7,8 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
     /// <inheritdoc/>
     public class DiscordInteractionCommandHandlerFactory : IDiscordInteractionCommandHandlerFactory
     {
-        private readonly IDictionary<ulong, ServiceDescriptor> _descriptors;
+        private readonly IDictionary<ulong, ServiceDescriptor> _descriptors
+            = new Dictionary<ulong, ServiceDescriptor>();
         private readonly object _lock = new object();
 
         /// <inheritdoc/>
