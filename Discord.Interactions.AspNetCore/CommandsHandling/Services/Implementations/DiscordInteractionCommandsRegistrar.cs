@@ -18,15 +18,17 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
         private readonly IServiceProvider _services;
         private readonly IDiscordInteractionCommandsLoader _loader;
         private readonly IDiscordInteractionCommandHandlerFactory _factory;
+        private readonly IDiscordInteractionCommandBuilder _builder;
 
         public DiscordInteractionCommandsRegistrar(ILogger<DiscordInteractionCommandsRegistrar> log, IOptions<DiscordInteractionsOptions> options, IServiceProvider services,
-            IDiscordInteractionCommandsLoader loader, IDiscordInteractionCommandHandlerFactory factory)
+            IDiscordInteractionCommandsLoader loader, IDiscordInteractionCommandHandlerFactory factory, IDiscordInteractionCommandBuilder builder)
         {
             this._log = log;
             this._options = options.Value;
             this._services = services;
             this._loader = loader;
             this._factory = factory;
+            this._builder = builder;
         }
 
         /// <inheritdoc/>
@@ -48,15 +50,16 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
             if (!commandTypes.Any())
                 return;
 
-            // service scope will be used for safe constructor invokation, as well as retrieving HTTP Client
+            // service scope will be used for HTTP Client only
             using IServiceScope scope = this._services.CreateScope();
+            IDiscordApplicationCommandsClient client = scope.ServiceProvider.GetRequiredService<IDiscordApplicationCommandsClient>();
 
             // perform registration
-            await this.RegisterGlobalCommandsAsync(scope.ServiceProvider, commandTypes, cancellationToken).ConfigureAwait(false);
-            await this.RegisterGuildCommandsAsync(scope.ServiceProvider, commandTypes, cancellationToken).ConfigureAwait(false);
+            await this.RegisterGlobalCommandsAsync(client, commandTypes, cancellationToken).ConfigureAwait(false);
+            await this.RegisterGuildCommandsAsync(client, commandTypes, cancellationToken).ConfigureAwait(false);
         }
 
-        private Task RegisterGlobalCommandsAsync(IServiceProvider services, IEnumerable<TypeInfo> handlerTypes, CancellationToken cancellationToken)
+        private Task RegisterGlobalCommandsAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> handlerTypes, CancellationToken cancellationToken)
         {
             // filter out guild commands
             handlerTypes = handlerTypes.Where(type =>
@@ -65,10 +68,10 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
                 return Task.CompletedTask;
 
             this._log.LogDebug("Registering global Discord Application commands");
-            return this.RegisterCommandsInternalAsync(services, handlerTypes, null, cancellationToken);
+            return this.RegisterCommandsInternalAsync(client, handlerTypes, null, cancellationToken);
         }
 
-        private async Task RegisterGuildCommandsAsync(IServiceProvider services, IEnumerable<TypeInfo> handlerTypes, CancellationToken cancellationToken)
+        private async Task RegisterGuildCommandsAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> handlerTypes, CancellationToken cancellationToken)
         {
             // filter out commands that don't have guild command attribute
             handlerTypes = handlerTypes.Where(type => 
@@ -92,11 +95,11 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
                     .GetCustomAttribute<GuildInteractionCommandAttribute>().GuildIDs.Contains(gid));
 
                 // register them
-                await this.RegisterCommandsInternalAsync(services, guildCommandTypes, gid, cancellationToken).ConfigureAwait(false);
+                await this.RegisterCommandsInternalAsync(client, guildCommandTypes, gid, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private async Task RegisterCommandsInternalAsync(IServiceProvider services, IEnumerable<TypeInfo> handlerTypes, ulong? guildID, CancellationToken cancellationToken)
+        private async Task RegisterCommandsInternalAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> handlerTypes, ulong? guildID, CancellationToken cancellationToken)
         {
             if (handlerTypes?.Any() != true)
                 return;
@@ -113,7 +116,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
                 ServiceDescriptor descriptor = new ServiceDescriptor(type, type, lifetime);
 
                 // build command
-                DiscordApplicationCommand builtCmd = this.BuildApplicationCommand(descriptor, services);
+                DiscordApplicationCommand builtCmd = await this._builder.BuildAsync(type, cancellationToken).ConfigureAwait(false);
                 builtCommands.Add(builtCmd);
 
                 // store result
@@ -126,7 +129,6 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
                 // register commands with the client
                 this._log.LogTrace("Sending Discord request to register {Count} commands", builtCommands.Count);
                 IEnumerable<DiscordApplicationCommand> results;
-                IDiscordApplicationCommandsClient client = services.GetRequiredService<IDiscordApplicationCommandsClient>();
                 if (guildID != null)
                     results = await client.RegisterGuildCommandsAsync(guildID.Value, builtCommands, cancellationToken).ConfigureAwait(false);
                 else
@@ -148,26 +150,6 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
                 if (guildID != null)
                     exMsg += " for guild ID {GuildID}";
                 return exMsg;
-            }
-        }
-
-        private DiscordApplicationCommand BuildApplicationCommand(ServiceDescriptor descriptor, IServiceProvider scopedServices)
-        {
-            // buildable commands need to be initialized briefly
-            if (typeof(IBuildableDiscordInteractionCommand).IsAssignableFrom(descriptor.ServiceType))
-            {
-                IBuildableDiscordInteractionCommand handler = this._factory.CreateCommand(descriptor, scopedServices) as IBuildableDiscordInteractionCommand;
-                DiscordApplicationCommand result = handler.Build();
-                try { (handler as IDisposable)?.Dispose(); } catch { }
-                return result;
-            }
-            // non-buildable = build from the attribute
-            else
-            {
-                InteractionCommandAttribute commandAttribute = descriptor.ImplementationType.GetCustomAttribute<InteractionCommandAttribute>(inherit: true);
-                if (commandAttribute == null)
-                    throw new InvalidOperationException($"Command handler {descriptor.ImplementationType.GetType().FullName} cannot be built - {nameof(InteractionCommandAttribute)} not present.");
-                return new DiscordApplicationCommand(commandAttribute.CommandType, commandAttribute.Name, commandAttribute.Description, true);
             }
         }
 

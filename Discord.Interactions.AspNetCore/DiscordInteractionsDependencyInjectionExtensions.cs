@@ -34,6 +34,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddTransient<IDiscordApplicationCommandsClient, DiscordApplicationCommandsClient>();
 
             // loading and registering
+            services.TryAddTransient<IDiscordInteractionCommandBuilder, DiscordInteractionCommandBuilder>();
             services.TryAddTransient<IDiscordInteractionCommandsLoader, DiscordInteractionCommandsLoader>();
             services.AddHostedService<DiscordInteractionCommandsRegistrar>();
 
