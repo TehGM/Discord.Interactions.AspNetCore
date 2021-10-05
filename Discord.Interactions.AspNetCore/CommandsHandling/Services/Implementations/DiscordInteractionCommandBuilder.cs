@@ -11,20 +11,21 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
     /// <inheritdoc/>
     public class DiscordInteractionCommandBuilder : IDiscordInteractionCommandBuilder
     {
-        private readonly IServiceProvider _services;
+        /// <summary>Services that can be used for invoking the build method.</summary>
+        protected IServiceProvider Services { get; }
 
         /// <summary>Initializes a new instance of the class.</summary>
         /// <param name="services">Services that can be used for invoking the build method.</param>
         public DiscordInteractionCommandBuilder(IServiceProvider services)
         {
-            this._services = services;
+            this.Services = services;
         }
 
         /// <inheritdoc/>
         /// <summary>Builds the command by invoking method marked with <see cref="InteractionCommandBuilderAttribute"/> or using <see cref="InteractionCommandAttribute"/>.</summary>
         /// <param name="cancellationToken">Cancellation token that will be passed to the build method.</param>
         /// <param name="type">Type to look for attributes in.</param>
-        public async Task<DiscordApplicationCommand> BuildAsync(Type type, CancellationToken cancellationToken)
+        public Task<DiscordApplicationCommand> BuildAsync(Type type, CancellationToken cancellationToken)
         {
             // try to use the builder method first
             IEnumerable<MethodInfo> methods = type.GetMethods().Where(method =>
@@ -46,21 +47,13 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
                         $"{nameof(Task<DiscordApplicationCommand>)} can be marked with {nameof(InteractionCommandBuilderAttribute)}.");
 
                 // build params
-                object[] parameterValues = BuildMethodParameters(method, this._services, cancellationToken);
+                object[] parameterValues = BuildMethodParameters(method, cancellationToken);
 
                 // invoke method
                 object result = method.Invoke(null, parameterValues);
 
-                // if it's a task, await it
-                if (result is Task<DiscordApplicationCommand> taskResult)
-                    result = await taskResult.ConfigureAwait(false);
-
-                // if result is not a collection, wrap it into one
-                if (result is DiscordApplicationCommand objectResult)
-                    result = new DiscordApplicationCommand[] { objectResult };
-
                 // finally, return the results
-                return (DiscordApplicationCommand)result;
+                return HandleMethodReturnValue(result, method);
             }
             // if builder method is not there, check attribute on class
             else
@@ -68,12 +61,12 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
                 InteractionCommandAttribute commandAttribute = type.GetCustomAttribute<InteractionCommandAttribute>(inherit: true);
                 if (commandAttribute == null)
                     throw new InvalidOperationException($"Command handler {type.FullName} cannot be built - {nameof(InteractionCommandAttribute)} not present.");
-                return new DiscordApplicationCommand(commandAttribute.CommandType, commandAttribute.Name, commandAttribute.Description, true);
+                return HandleClassAttribute(commandAttribute, type);
             }
         }
 
         private static object[] _emptyParams = new object[] { };
-        private static object[] BuildMethodParameters(MethodInfo method, IServiceProvider services, CancellationToken cancellationToken)
+        private object[] BuildMethodParameters(MethodInfo method, CancellationToken cancellationToken)
         {
             ParameterInfo[] parameters = method.GetParameters();
             if (!parameters.Any())
@@ -82,39 +75,80 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
             object[] results = new object[parameters.Length];
             for (int i = 0; i < parameters.Length; i++)
             {
-                ParameterInfo p = parameters[i];
-
-                // try from service provider first
-                object service = services.GetService(p.ParameterType);
-                if (service != null)
-                {
-                    results[i] = service;
-                    continue;
-                }
-
-                // try service provider itself
-                if (p.ParameterType.IsAssignableFrom(services.GetType()))
-                {
-                    results[i] = services;
-                    continue;
-                }
-
-                // try cancellation token
-                if (p.ParameterType.IsAssignableFrom(typeof(CancellationToken)))
-                {
-                    results[i] = services;
-                    continue;
-                }
-
-                // none found, throw
-                throw new InvalidOperationException($"Unsupported param type: {p.ParameterType.FullName}");
+                ParameterInfo parameter = parameters[i];
+                if (TryResolveMethodParameter(parameter, cancellationToken, out object value))
+                    results[i] = value;
+                else if (parameter.HasDefaultValue)
+                    results[i] = parameter.DefaultValue;
+                else if (parameter.IsOptional)
+                    results[i] = Type.Missing;
+                else
+                    throw new InvalidOperationException($"Unsupported param type: {parameter.ParameterType.FullName}");
             }
 
             return results;
         }
 
-        private static bool IsAllowedReturnType(Type type)
+        /// <summary>Resolves value or instance for a method parameter.</summary>
+        /// <param name="parameter">Parameter to resolve instance for.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to resolve CancellationToken parameters.</param>
+        /// <param name="result">The resolved value.</param>
+        /// <returns>True if parameter value could be resolved; otherwise false.</returns>
+        protected virtual bool TryResolveMethodParameter(ParameterInfo parameter, CancellationToken cancellationToken, out object result)
+        {
+            // try from service provider first
+            object service = this.Services.GetService(parameter.ParameterType);
+            if (service != null)
+            {
+                result = service;
+                return true;
+            }
+
+            // try service provider itself
+            if (parameter.ParameterType.IsAssignableFrom(this.Services.GetType()))
+            {
+                result = this.Services;
+                return true;
+            }
+
+            // try cancellation token
+            if (parameter.ParameterType.IsAssignableFrom(typeof(CancellationToken)))
+            {
+                result = cancellationToken;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        /// <summary>Determines if the build method is allowed to return given type.</summary>
+        /// <param name="type">Return type of the build method.</param>
+        /// <returns>True if return type is allowed for build method; otherwise false.</returns>
+        protected virtual bool IsAllowedReturnType(Type type)
             => typeof(DiscordApplicationCommand).IsAssignableFrom(type)
             || typeof(Task<DiscordApplicationCommand>).IsAssignableFrom(type);
+
+        /// <summary>Handles/converts the value returned by the invoked build method.</summary>
+        /// <param name="returnedValue">The value returned by the method.</param>
+        /// <param name="method">The method info.</param>
+        /// <returns>Method's return value converted to <see cref="DiscordApplicationCommand"/>.</returns>
+        protected virtual async Task<DiscordApplicationCommand> HandleMethodReturnValue(object returnedValue, MethodInfo method)
+        {
+            object result = returnedValue;
+
+            // if it's a task, await it
+            if (result is Task<DiscordApplicationCommand> taskResult)
+                result = await taskResult.ConfigureAwait(false);
+
+            return (DiscordApplicationCommand)result;
+        }
+
+        /// <summary>Builds command from the attribute on the class.</summary>
+        /// <param name="attribute">Attribute found on the class.</param>
+        /// <param name="classType">The type of the class</param>
+        /// <returns>Built command.</returns>
+        protected virtual Task<DiscordApplicationCommand> HandleClassAttribute(InteractionCommandAttribute attribute, Type classType)
+            => Task.FromResult(new DiscordApplicationCommand(attribute.CommandType, attribute.Name, attribute.Description, true));
     }
 }
