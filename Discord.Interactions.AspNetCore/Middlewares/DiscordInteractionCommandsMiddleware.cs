@@ -11,7 +11,7 @@ using TehGM.Discord.Interactions.CommandsHandling;
 
 namespace TehGM.Discord.Interactions.AspNetCore
 {
-    /// <summary>A middleware that invokes registered <see cref="IDiscordInteractionCommand"/>.</summary>
+    /// <summary>A middleware that invokes registered <see cref="IDiscordInteractionCommandHandler"/>.</summary>
     /// <remarks><para>When an interaction is received, this middleware will check registered command handlers for one that can handle the interaction.
     /// If the handler was found, the command will be invoked, and no further middleware or controller will run.</para>
     /// <para>If no command with matching ID is found, the request will be passed further the middleware pipeline.</para></remarks>
@@ -19,13 +19,13 @@ namespace TehGM.Discord.Interactions.AspNetCore
     {
         private readonly RequestDelegate _next;
         private readonly ILogger _log;
-        private readonly IDiscordInteractionCommandsProvider _commands;
+        private readonly IDiscordInteractionCommandHandlerProvider _commands;
 
         /// <summary>Creates an instance of the middleware.</summary>
         /// <param name="next">Delegate to the next middleware.</param>
         /// <param name="log">Logger this middleware will use to log messages to.</param>
         /// <param name="commands">Provider of registered Interaction Commands.</param>
-        public DiscordInteractionCommandsMiddleware(RequestDelegate next, ILogger<DiscordInteractionCommandsMiddleware> log, IDiscordInteractionCommandsProvider commands)
+        public DiscordInteractionCommandsMiddleware(RequestDelegate next, ILogger<DiscordInteractionCommandsMiddleware> log, IDiscordInteractionCommandHandlerProvider commands)
         {
             this._next = next;
             this._log = log;
@@ -47,7 +47,7 @@ namespace TehGM.Discord.Interactions.AspNetCore
             }
             // try to get command handler
             // if cannot, then also pass
-            IDiscordInteractionCommand cmd = this._commands.GetCommand(commandID.Value);
+            IDiscordInteractionCommandHandler cmd = this._commands.GetCommand(commandID.Value);
             if (cmd == null)
             {
                 await this._next.Invoke(context).ConfigureAwait(false);

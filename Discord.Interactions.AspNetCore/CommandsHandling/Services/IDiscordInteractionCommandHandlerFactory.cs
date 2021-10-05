@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace TehGM.Discord.Interactions.CommandsHandling
 {
-    /// <summary>Factory service that can create <see cref="IDiscordInteractionCommand"/> instances.</summary>
+    /// <summary>Factory service that can create <see cref="IDiscordInteractionCommandHandler"/> instances.</summary>
     public interface IDiscordInteractionCommandHandlerFactory
     {
         /// <summary>Adds a new command service descriptor for a specific command ID.</summary>
@@ -18,7 +18,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling
         /// <param name="handlerDescriptor">Descriptor to create the command from.</param>
         /// <param name="services">Service provider to use for creating the handler isntance.</param>
         /// <returns>Created handler instance.</returns>
-        IDiscordInteractionCommand CreateCommand(ServiceDescriptor handlerDescriptor, IServiceProvider services);
+        IDiscordInteractionCommandHandler CreateCommand(ServiceDescriptor handlerDescriptor, IServiceProvider services);
         /// <summary>Removes a specific cached command handler descriptor from the factory.</summary>
         /// <param name="commandID">ID of the command.</param>
         /// <returns>True if the descriptor was found and removed; otherwise false.</returns>

@@ -20,10 +20,10 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
         {
             _log?.LogTrace("Loading assembly {Name}", assembly.FullName);
             IEnumerable<TypeInfo> types = assembly.DefinedTypes.Where(t => !t.IsAbstract && !t.ContainsGenericParameters
-                && !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute)) && typeof(IDiscordInteractionCommand).IsAssignableFrom(t));
+                && !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute)) && typeof(IDiscordInteractionCommandHandler).IsAssignableFrom(t));
             if (!types.Any())
             {
-                _log?.LogWarning("Cannot load commands from assembly {Name} - no non-static non-abstract non-generic classes implementing {Type} interface", assembly.FullName, nameof(IDiscordInteractionCommand));
+                _log?.LogWarning("Cannot load commands from assembly {Name} - no non-static non-abstract non-generic classes implementing {Type} interface", assembly.FullName, nameof(IDiscordInteractionCommandHandler));
                 return Enumerable.Empty<TypeInfo>();
             }
 

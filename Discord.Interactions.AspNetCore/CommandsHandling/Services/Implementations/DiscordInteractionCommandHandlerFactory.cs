@@ -21,7 +21,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
         }
 
         /// <inheritdoc/>
-        public IDiscordInteractionCommand CreateCommand(ServiceDescriptor handlerDescriptor, IServiceProvider services)
+        public IDiscordInteractionCommandHandler CreateCommand(ServiceDescriptor handlerDescriptor, IServiceProvider services)
         {
             if (handlerDescriptor == null)
                 throw new ArgumentNullException(nameof(handlerDescriptor));
@@ -40,7 +40,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
             else if (handlerDescriptor.ServiceType != null)
                 result = ActivatorUtilities.CreateInstance(services, handlerDescriptor.ServiceType);
 
-            return result as IDiscordInteractionCommand;
+            return result as IDiscordInteractionCommandHandler;
         }
 
         /// <inheritdoc/>

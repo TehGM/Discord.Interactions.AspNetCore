@@ -27,7 +27,7 @@ namespace TehGM.Discord.Interactions
 
         /// <summary>Whether the commands should be automatically registered.</summary>
         /// <remarks><para>Registration of commands overwrites all previously registered commands. For this reason, it's opt-in.</para>
-        /// <para>However, if this option is disabled, the library won't support any <see cref="IDiscordInteractionCommand"/> - manual registration or handling commands in a controller will be required.</para></remarks>
+        /// <para>However, if this option is disabled, the library won't support any <see cref="IDiscordInteractionCommandHandler"/> - manual registration or handling commands in a controller will be required.</para></remarks>
         public bool RegisterCommands { get; set; } = false;
 
         /// <summary>Set of assemblies interaction commands should be automatically loaded from.</summary>

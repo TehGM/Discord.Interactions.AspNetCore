@@ -41,12 +41,12 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
             }
 
             this._log.LogInformation("Registering Discord Application Commands");
-            this._log.LogTrace("Loading types implementing {Type} from assemblies", nameof(IDiscordInteractionCommand));
+            this._log.LogTrace("Loading types implementing {Type} from assemblies", nameof(IDiscordInteractionCommandHandler));
             List<TypeInfo> commandTypes = new List<TypeInfo>();
             foreach (Assembly asm in this._options.CommandAssemblies)
                 commandTypes.AddRange(this._loader.LoadFromAssembly(asm));
 
-            this._log.LogDebug("{Count} types implementing {Type} interface loaded from assemblies", commandTypes.Count, nameof(IDiscordInteractionCommand));
+            this._log.LogDebug("{Count} types implementing {Type} interface loaded from assemblies", commandTypes.Count, nameof(IDiscordInteractionCommandHandler));
             if (!commandTypes.Any())
                 return;
 

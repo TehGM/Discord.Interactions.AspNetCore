@@ -3,7 +3,7 @@
 namespace TehGM.Discord.Interactions.CommandsHandling
 {
     /// <summary>Marks the class as an interaction command.</summary>
-    /// <remarks>Note that the class still needs to implement <see cref="IDiscordInteractionCommand"/> to work.</remarks>
+    /// <remarks>Note that the class still needs to implement <see cref="IDiscordInteractionCommandHandler"/> to work.</remarks>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class InteractionCommandAttribute : Attribute
     {

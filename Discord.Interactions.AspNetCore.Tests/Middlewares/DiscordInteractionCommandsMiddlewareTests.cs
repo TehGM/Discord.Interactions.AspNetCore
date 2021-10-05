@@ -19,7 +19,7 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
     {
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IDiscordInteractionCommandsProvider, TestInteractionCommandsProvider>();
+            services.AddSingleton<IDiscordInteractionCommandHandlerProvider, TestInteractionCommandsProvider>();
         }
 
         protected override void Configure(IApplicationBuilder app)
@@ -60,21 +60,21 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
             return new DiscordInteractionReaderFeature(bodyJson.ToString());
         }
 
-        private class TestInteractionCommandsProvider : IDiscordInteractionCommandsProvider
+        private class TestInteractionCommandsProvider : IDiscordInteractionCommandHandlerProvider
         {
-            public IDiscordInteractionCommand GetCommand(ulong commandID)
+            public IDiscordInteractionCommandHandler GetCommand(ulong commandID)
             {
                 if (commandID == 1234)
                     return new TestInteractionCommand();
                 return null;
             }
 
-            public void AddCommand(ulong commandID, IDiscordInteractionCommand handler) => throw new NotImplementedException();
+            public void AddCommand(ulong commandID, IDiscordInteractionCommandHandler handler) => throw new NotImplementedException();
             public bool RemoveCommand(ulong commandID) => throw new NotImplementedException();
             public void Clear() => throw new NotImplementedException();
         }
 
-        private class TestInteractionCommand : IDiscordInteractionCommand
+        private class TestInteractionCommand : IDiscordInteractionCommandHandler
         {
             public Task<DiscordInteractionResponse> InvokeAsync(DiscordInteraction message, HttpRequest request, CancellationToken cancellationToken)
             {

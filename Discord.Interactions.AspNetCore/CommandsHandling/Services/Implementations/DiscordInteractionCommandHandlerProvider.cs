@@ -6,7 +6,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
     /// <inheritdoc/>
     /// <remarks>This class should be registered as scoped, so it can effectively resolve scoped services. 
     /// To resolve singleton ones, it uses singleton cache <see cref="DiscordInteractionCommandHandlerCache"/>.</remarks>
-    public class DiscordInteractionCommandsProvider : IDiscordInteractionCommandsProvider, IDisposable
+    public class DiscordInteractionCommandHandlerProvider : IDiscordInteractionCommandHandlerProvider, IDisposable
     {
         private readonly DiscordInteractionCommandHandlerCache _singletonCommands;
         private readonly DiscordInteractionCommandHandlerCache _scopedCommands;
@@ -18,7 +18,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
         /// <param name="services">Services provider for creating command handler instances that have non-singleton lifetime.</param>
         /// <param name="factory">Commands factory for creating command handler instances.</param>
         /// <param name="singletonCommands">Cache of singleton-lifetime commands.</param>
-        public DiscordInteractionCommandsProvider(IServiceProvider services, IDiscordInteractionCommandHandlerFactory factory, DiscordInteractionCommandHandlerCache singletonCommands)
+        public DiscordInteractionCommandHandlerProvider(IServiceProvider services, IDiscordInteractionCommandHandlerFactory factory, DiscordInteractionCommandHandlerCache singletonCommands)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
@@ -34,7 +34,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
         }
 
         /// <inheritdoc/>
-        public IDiscordInteractionCommand GetCommand(ulong commandID)
+        public IDiscordInteractionCommandHandler GetCommand(ulong commandID)
         {
             lock (this._lock)
             {
@@ -56,12 +56,12 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
             }
         }
 
-        private IDiscordInteractionCommand GetOrCreateCommand(ulong commandID, ServiceDescriptor descriptor, DiscordInteractionCommandHandlerCache cache)
+        private IDiscordInteractionCommandHandler GetOrCreateCommand(ulong commandID, ServiceDescriptor descriptor, DiscordInteractionCommandHandlerCache cache)
         {
             if (cache == null)
                 throw new ArgumentNullException(nameof(cache));
 
-            if (cache.TryGetValue(commandID, out IDiscordInteractionCommand result))
+            if (cache.TryGetValue(commandID, out IDiscordInteractionCommandHandler result))
                 return result;
             result = this._factory.CreateCommand(descriptor, cache.Services);
             if (result != null)
