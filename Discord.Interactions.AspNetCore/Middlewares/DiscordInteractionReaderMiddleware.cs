@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using TehGM.Discord.Interactions.AspNetCore.Services;
 
 namespace TehGM.Discord.Interactions.AspNetCore
 {

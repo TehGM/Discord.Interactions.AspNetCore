@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using NUnit.Framework;
+using TehGM.Discord.Interactions.AspNetCore.Services;
 
 namespace TehGM.Discord.Interactions.AspNetCore.Tests
 {
@@ -17,30 +13,31 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
     {
         protected override void Configure(IApplicationBuilder app)
         {
-            app.UseMiddleware<DiscordInteractionReaderMiddleware>();
             app.UseMiddleware<DiscordPingHandlingMiddleware>();
         }
 
         [Test]
         public async Task PingHandling_HandlesPing()
         {
-            HttpClient client = base.Host.GetTestClient();
+            var server = base.Host.GetTestServer();
+            var feature = new DiscordInteractionReaderFeature("{ type: 1 }");
 
-            var response = await client.PostAsync("/api/discord/interactions", 
-                new StringContent("{ type: 1 }", Encoding.UTF8, "application/json"));
+            var context = await server.SendAsync(ctx =>
+                ctx.Features.Set<IDiscordInteractionReaderFeature>(feature));
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual((int)HttpStatusCode.OK, context.Response.StatusCode);
         }
 
         [Test]
         public async Task PingHandling_IgnoresNonPing()
         {
-            HttpClient client = base.Host.GetTestClient();
+            var server = base.Host.GetTestServer();
+            var feature = new DiscordInteractionReaderFeature("{ type: 2 }");
 
-            var response = await client.PostAsync("/api/discord/interactions", 
-            new StringContent("{ type: 2 }", Encoding.UTF8, "application/json"));
+            var context = await server.SendAsync(ctx =>
+                ctx.Features.Set<IDiscordInteractionReaderFeature>(feature));
 
-            Assert.AreNotEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreNotEqual((int)HttpStatusCode.OK, context.Response.StatusCode);
         }
     }
 }

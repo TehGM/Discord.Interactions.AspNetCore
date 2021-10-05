@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +8,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using TehGM.Discord.Interactions.AspNetCore.Services;
 using TehGM.Discord.Interactions.CommandsHandling;
 
 namespace TehGM.Discord.Interactions.AspNetCore.Tests
@@ -25,39 +24,40 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
 
         protected override void Configure(IApplicationBuilder app)
         {
-            app.UseMiddleware<DiscordInteractionReaderMiddleware>();
             app.UseMiddleware<DiscordInteractionCommandsMiddleware>();
         }
 
         [Test]
         public async Task InteractionCommands_KnownCommand_Passes()
         {
-            HttpClient client = base.Host.GetTestClient();
-            JObject bodyJson = new JObject(
-                new JProperty("type", DiscordInteractionType.ApplicationCommand),
-                new JProperty("data", new JObject(
-                    new JProperty("id", 1234))));
+            var server = base.Host.GetTestServer();
+            var feature = this.GetFeatureForCommand(1234);
 
-            HttpContent body = new StringContent(bodyJson.ToString(), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("/api/discord/interactions", body);
+            var context = await server.SendAsync(ctx =>
+                ctx.Features.Set<IDiscordInteractionReaderFeature>(feature));
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual((int)HttpStatusCode.OK, context.Response.StatusCode);
         }
 
         [Test]
         public async Task InteractionCommands_UnknownCommand_Fails()
         {
-            HttpClient client = base.Host.GetTestClient();
+            var server = base.Host.GetTestServer();
+            var feature = this.GetFeatureForCommand(4321);
+
+            var context = await server.SendAsync(ctx =>
+                ctx.Features.Set<IDiscordInteractionReaderFeature>(feature));
+
+            Assert.AreNotEqual((int)HttpStatusCode.OK, context.Response.StatusCode);
+        }
+
+        private IDiscordInteractionReaderFeature GetFeatureForCommand(ulong commandID)
+        {
             JObject bodyJson = new JObject(
-                new JProperty("type", DiscordInteractionType.ApplicationCommand),
+                new JProperty("type", (int)DiscordInteractionType.ApplicationCommand),
                 new JProperty("data", new JObject(
-                    new JProperty("id", 4321))));
-
-            HttpContent body = new StringContent(bodyJson.ToString(), Encoding.UTF8, "application/json");
-
-            var response = await client.PostAsync("/api/discord/interactions", body);
-
-            Assert.AreNotEqual(HttpStatusCode.OK, response.StatusCode);
+                    new JProperty("id", commandID))));
+            return new DiscordInteractionReaderFeature(bodyJson.ToString());
         }
 
         private class TestInteractionCommandsProvider : IDiscordInteractionCommandsProvider
