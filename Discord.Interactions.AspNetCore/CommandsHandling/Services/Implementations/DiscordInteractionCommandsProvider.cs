@@ -5,11 +5,12 @@ using System.Linq;
 namespace TehGM.Discord.Interactions.CommandsHandling.Services
 {
     /// <inheritdoc/>
-    class DiscordInteractionCommandsProvider : IDiscordInteractionCommandsProvider, IDisposable
+    public class DiscordInteractionCommandsProvider : IDiscordInteractionCommandsProvider, IDisposable
     {
         private readonly IDictionary<ulong, IDiscordInteractionCommand> _commands;
         private readonly object _lock = new object();
 
+        /// <summary>Initializes a new, empty provider.</summary>
         public DiscordInteractionCommandsProvider()
         {
             this._commands = new Dictionary<ulong, IDiscordInteractionCommand>();
