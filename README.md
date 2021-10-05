@@ -46,14 +46,14 @@ app.UseDiscordInteractions();
 ## Interaction Commands
 This library provides an system allowing you design your commands easily. These commands are called Interaction Commands.
 
-The commands themselves are classes that implement [IDiscordInteractionCommand](Discord.Interactions.AspNetCore/CommandsHandling/IDiscordInteractionCommand.cs) interface. [IDiscordInteractionCommand](Discord.Interactions.AspNetCore/CommandsHandling/IDiscordInteractionCommand.cs) requires only one method, `InvokeAsync`, which will be called whenever your application receives the matching interaction command. You should return your response here, which will be sent back to Discord.  
+The commands, or rather their handlers, are classes that implement [IDiscordInteractionCommandHandler](Discord.Interactions.AspNetCore/CommandsHandling/IDiscordInteractionCommandHandler.cs) interface. [IDiscordInteractionCommandHandler](Discord.Interactions.AspNetCore/CommandsHandling/IDiscordInteractionCommandHandler.cs) requires only one method, `InvokeAsync`, which will be called whenever your application receives the matching interaction command. You should return your response here, which will be sent back to Discord.  
 Note that implementation of this method should be lightweight, as Discord server will cancel the interaction after 3 seconds.
 
 ```csharp
 // example code for slash command /ping
-public PingCommand : IDiscordInteractionCommand
+public class PingCommandHandler : IDiscordInteractionCommandHandler
 {
-    public async Task<DiscordInteractionResponse> InvokeAsync(DiscordInteraction message, HttpRequest request, IServiceProvider services, CancellationToken cancellationToken)
+    public async Task<DiscordInteractionResponse> InvokeAsync(DiscordInteraction message, HttpRequest request, CancellationToken cancellationToken)
     {
         DiscordUser user = message.User ?? message.GuildMember.User;
         return new DiscordInteractionResponseBuilder()
@@ -63,34 +63,64 @@ public PingCommand : IDiscordInteractionCommand
 }
 ```
 
-#### Disposable Commands
-If your command implements `IDisposable`, its `Dispose()` method will be called by [IDiscordInteractionCommandsProvider](Discord.Interactions.AspNetCore/CommandsHandling/Services/IDiscordInteractionCommandsProvider.cs) when it's being disposed by the host.
+#### Dependency Injection
+Commands fully support dependency injection via constructor, like other ASP.NET Core services. Commands with [scoped lifetime](#handler-lifetime) will receive services scoped to the interaction's request.
+
+```csharp
+// example code for slash command /ping
+public class PingCommandHandler : IDiscordInteractionCommandHandler
+{
+    private readonly ILogger _log;
+
+    public PingCommandHandler(ILogger<PingCOmmandHandler> log)
+    {
+        this._log = log;
+    }
+
+    // ... other code such as InvokeAsync here ...
+}
+```
+
+#### Handler Lifetime
+By default, every command handler has scoped lifetime, which should be perfect for most use cases. If you need to change the lifetime of your handler, you can do it with [\[InteractionCommandLifetime\]](Discord.Interactions.AspNetCore/CommandsHandling/InteractionCommandLifetimeAttribute.cs) attribute.
+
+```csharp
+// example code for slash command /ping
+[InteractionCommandLifetime(ServiceLifetime.Singleton)]
+public class PingCommandHandler : IDiscordInteractionCommandHandler
+{
+    // ... other code such as InvokeAsync here ...
+}
+```
+
+#### Disposable Handlers
+If your handler implements `IDisposable`, its `Dispose()` method will be called by [DiscordInteractionCommandHandlerCache](Discord.Interactions.AspNetCore/CommandsHandling/Services/Implementations/DiscordInteractionCommandHandlerCache.cs) when it's being disposed by the host - at the end of the request scope for scoped and transient handlers, during application shutdown for singleton ones.
 
 > Note: commands removed by manually calling `RemoveCommand()` or `Clear()` will not be disposed by the provider. Please dispose them manually if needed.
 
 ### Using existing Application Commands
-If you want to re-use commands you registered previously, you can simply add them to [IDiscordInteractionCommandsProvider](Discord.Interactions.AspNetCore/CommandsHandling/Services/IDiscordInteractionCommandsProvider.cs). You can do it by, for example, using [IHostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
+If you want to re-use commands you registered previously, you can simply add them to [IDiscordInteractionCommandHandlerFactory](Discord.Interactions.AspNetCore/CommandsHandling/Services/IDiscordInteractionCommandHandlerFactory.cs). You can do it by, for example, using [IHostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
 
-In order to add the command, you need to know provide its Discord-assigned ID. You can request it from Discord servers, load from file, hardcode it - your choice, but if the command ID does not match, the command code will never be executed.
+In order to add the command, you need to know provide its Discord-assigned ID. You can request it from Discord servers, load from file, hardcode it - your choice, but if the command ID does not match, the command handler will never be executed.
 
 ```csharp
 // IHostedService code
 public class RegisterMyCommands : BackgroundService, IHostedService
 {
-    private readonly IDiscordInteractionCommandsProvider _commandsProvider;
+    private readonly IDiscordInteractionCommandHandlerFactory _handlerFactory;
 
-    public RegisterMyCommands(IDiscordInteractionCommandsProvider commandsProvider)
+    public RegisterMyCommands(IDiscordInteractionCommandHandlerFactory handlerFactory)
     {
-        this._commandsProvider = commandsProvider;_
+        this._handlerFactory = handlerFactory;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // ... load your command IDs
         ulong pingCommandID = // ...
 
         // add each command
-        this._commandsProvider.AddCommand(pingCommandID, new PingCommand());
+        this._handlerFactory.AddScopedCommand<PingCommandHandler>(pingCommandID);
     }
 }
 ```
@@ -102,7 +132,7 @@ services.AddHostedService<RegisterMyCommands>();
 ```
 
 ### Registering new Application Commands
-The library will not load and register commands by default. This is opt-in, as enabling this feature will overwrite all commands your application might've already registered with Discord.
+The library will not load and register Application Commands by default. This is opt-in, as enabling this feature will overwrite all commands your application might've already registered with Discord.
 
 However, re-registering commands from the application can be useful if you only run a single instance of the application, as it'll ensure that all your commands are automatically updated and tracked. If you wish to enable this feature, set `RegisterCommands` option to true. Additionally, you'll also need to provide bot token and application ID. Both can be found on [Discord Developer Portal](https://discord.com/developers/applications).
 ```csharp
@@ -115,27 +145,30 @@ services.AddDiscordInteractions(options =>
     options.ApplicationID = "Discord Issued Application ID";
 });
 ```
-Additionally, the library will need some information about the commands to be able to register them with Discord. If you only need basic setup, you can use [\[InteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/Attributes/InteractionCommandAttribute.cs) attribute
+
+Additionally, the library will need some information about the commands to be able to register them with Discord. If you only need basic setup, you can use [\[InteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/InteractionCommandAttribute.cs) attribute
 
 ```csharp
 // example code for slash command /ping
 [InteractionCommand("ping", "Pings me!")]
-public PingCommand : IDiscordInteractionCommand
+public class PingCommandHandler : IDiscordInteractionCommandHandler
 {
     // ... other code such as InvokeAsync here ...
 }
 ```
 
-If you want to register a command that is more complex than just name and description, remove [\[InteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/Attributes/InteractionCommandAttribute.cs) attribute, and implement [IBuildableDiscordInteractionCommand](Discord.Interactions.AspNetCore/CommandsHandling/IBuildableDiscordInteractionCommand.cs) interface instead.
+If you want to register a command that is more complex than just name and description, create a new **static** method that returns either `DiscordApplicationCommand` or `Task<DiscordApplicationCommand>`, and mark it with [\[InteractionCommandBuilder\]](Discord.Interactions.AspNetCore/CommandsHandling/InteractionCommandBuilderAttribute.cs) attribute. You can inject any non-scoped service into its arguments, as well as `IServiceProvider`and `CancellationToken`.  
+Note that [\[InteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/InteractionCommandAttribute.cs) attribute will then be ignored, so you can remove it.
 
 ```csharp
 // example code for slash command /ping
-public PingCommand : IDiscordInteractionCommand, IBuildableDiscordInteractionCommand
+public class PingCommandHandler : IDiscordInteractionCommandHandler
 {
-    public DiscordApplicationCommand Build(IServiceProvider services)
+    [InteractionCommandBuilder]
+    public static async Task<DiscordApplicationCommand> BuildAsync(ILogger<PingCommandHandler> log, CancellationToken cancellationToken)
     {
         // build your command here
-        // you can also use `services` arg to resolve any dependencies
+        log.LogDebug("Building command {Command}", "/ping");
         return DiscordApplicationCommandBuilder.CreateSlashCommand("ping", "Pings me!")
             .AddOption(option =>
             {
@@ -149,18 +182,18 @@ public PingCommand : IDiscordInteractionCommand, IBuildableDiscordInteractionCom
 ```
 
 #### Guild Commands
-If you want a command to be added to a specific guild(s), you can use [\[GuildInteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/Attributes/GuildInteractionCommandAttribute.cs) attribute and provide IDs of the guilds this command should be registered for. Guild Commands will not be registered globally.
+If you want a command to be added to a specific guild(s), you can use [\[GuildInteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/GuildInteractionCommandAttribute.cs) attribute and provide IDs of the guilds this command should be registered for. Guild Commands will not be registered globally.
 ```csharp
 // example code for slash command /ping
 [InteractionCommand("ping", "Pings me!")]
 [GuildInteractionCommand(123456789, 987654321)] // register for guilds 123456789 and 987654321
-public PingCommand : IDiscordInteractionCommand
+public class PingCommand : IDiscordInteractionCommandHandler
 {
     // ... other code such as InvokeAsync here ...
 }
 ```
 
-[\[GuildInteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/Attributes/GuildInteractionCommandAttribute.cs) attribute works regardless if the command uses [\[InteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/Attributes/InteractionCommandAttribute.cs) attribute or [IBuildableDiscordInteractionCommand](Discord.Interactions.AspNetCore/CommandsHandling/IBuildableDiscordInteractionCommand.cs) interface.
+[\[GuildInteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/GuildInteractionCommandAttribute.cs) attribute works regardless if the command uses [\[InteractionCommand\]](Discord.Interactions.AspNetCore/CommandsHandling/InteractionCommandAttribute.cs) or [\[InteractionCommandBuilder\]](Discord.Interactions.AspNetCore/CommandsHandling/InteractionCommandBuilderAttribute.cs) attribute.
 
 ### Adding API Controller
 If you want to handle the commands by yourself instead of using the built-in commands handling system, you can add an API Controller on `api/discord/interactions`. Its Post method will be triggered whenever you receive a new interaction that wasn't handled by middlewares.
