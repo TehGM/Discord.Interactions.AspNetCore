@@ -1,0 +1,50 @@
+name: NuGet Publish
+
+on:
+  workflow_dispatch:
+  # all inputs default to push all - if package exists already, it'll be skipped anyway
+    inputs:
+      publishCore:
+        description: 'Publish Discord.Interactions (Y/N)?'
+        required: true
+        default: 'Y'
+      publishAspNetCore:
+        description: 'Publish Discord.Interactions.AspNetCore (Y/N)?'
+        required: true
+        default: 'Y'
+
+jobs:
+  nuget-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Prepare environment
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          source-url: https://api.nuget.org/v3/index.json
+          dotnet-version: 5.0.x
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.NUGET_TOKEN}}
+      - name: Exclude example projects
+        run: dotnet sln remove Examples/**
+      - name: Install dependencies
+        run: dotnet restore
+      
+      # Publish each package
+      - name: Publish Discord.Interactions
+        if: github.event.inputs.publishCore == 'Y'
+        run: |
+          mkdir __out
+          dotnet pack Discord.Interactions -c Release -o __out --no-restore
+          dotnet nuget push "./__out/*.nupkg" --skip-duplicate --no-symbols true --api-key ${{secrets.NUGET_TOKEN}}
+          rm -rf __out
+      - name: Publish Discord.Interactions.AspNetCore
+        if: github.event.inputs.publishAspNetCore == 'Y'
+        run: |
+          mkdir __out
+          dotnet pack Discord.Interactions.AspNetCore -c Release -o __out --no-restore
+          dotnet nuget push "./__out/*.nupkg" --skip-duplicate --no-symbols true --api-key ${{secrets.NUGET_TOKEN}}
+          rm -rf __out
