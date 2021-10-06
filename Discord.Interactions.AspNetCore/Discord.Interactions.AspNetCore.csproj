@@ -13,7 +13,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>discord aspnetcore interaction slash command</PackageTags>
     <Version>0.1.0</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageIcon>logo.png</PackageIcon>
     <PackageIconUrl />
