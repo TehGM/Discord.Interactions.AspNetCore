@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NUnit.Framework;
 using TehGM.Discord.Interactions.AspNetCore.Services;
 
@@ -29,7 +30,8 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
 
         protected override void Configure(IApplicationBuilder app)
         {
-            app.UseMiddleware<DiscordSignatureVerificationMiddleware>();
+            app.UseMiddleware<DiscordSignatureVerificationMiddleware>(
+                app.ApplicationServices.GetRequiredService<IOptions<DiscordInteractionsOptions>>().Value);
         }
 
         [Test]

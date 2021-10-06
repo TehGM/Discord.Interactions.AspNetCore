@@ -18,13 +18,13 @@ namespace TehGM.Discord.Interactions.AspNetCore
     {
         private readonly RequestDelegate _next;
         private readonly ILogger _log;
-        private readonly IOptionsMonitor<DiscordInteractionsOptions> _options;
+        private readonly DiscordInteractionsOptions _options;
 
         /// <summary>Creates an instance of the middleware.</summary>
         /// <param name="next">Delegate to the next middleware.</param>
         /// <param name="options">Options with <see cref="DiscordInteractionsOptions.PublicKey"/> used to validate the signature.</param>
         /// <param name="log">Logger this middleware will use to log messages to.</param>
-        public DiscordSignatureVerificationMiddleware(RequestDelegate next, IOptionsMonitor<DiscordInteractionsOptions> options, ILogger<DiscordSignatureVerificationMiddleware> log)
+        public DiscordSignatureVerificationMiddleware(RequestDelegate next, DiscordInteractionsOptions options, ILogger<DiscordSignatureVerificationMiddleware> log)
         {
             this._next = next;
             this._options = options;
@@ -44,7 +44,7 @@ namespace TehGM.Discord.Interactions.AspNetCore
             string timestamp = timestampValues.ToString();
             string body = context.Features.Get<IDiscordInteractionReaderFeature>().InteractionRaw;
 
-            byte[] key = Sodium.Utilities.HexToBinary(this._options.CurrentValue.PublicKey);
+            byte[] key = Sodium.Utilities.HexToBinary(this._options.PublicKey);
             byte[] signature = Sodium.Utilities.HexToBinary(signatureValues.ToString());
             byte[] message = Encoding.UTF8.GetBytes(timestamp + body);
 

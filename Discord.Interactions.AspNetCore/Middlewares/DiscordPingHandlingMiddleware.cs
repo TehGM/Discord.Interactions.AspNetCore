@@ -17,17 +17,14 @@ namespace TehGM.Discord.Interactions.AspNetCore
     {
         private readonly RequestDelegate _next;
         private readonly ILogger _log;
-        private readonly IOptionsMonitor<DiscordInteractionsOptions> _options;
 
         /// <summary>Creates an instance of the middleware.</summary>
         /// <param name="next">Delegate to the next middleware.</param>
         /// <param name="log">Logger this middleware will use to log messages to.</param>
-        /// <param name="options">Options that determine whether ping messages should be handled automatically.</param>
-        public DiscordPingHandlingMiddleware(RequestDelegate next, ILogger<DiscordPingHandlingMiddleware> log, IOptionsMonitor<DiscordInteractionsOptions> options)
+        public DiscordPingHandlingMiddleware(RequestDelegate next, ILogger<DiscordPingHandlingMiddleware> log)
         {
             this._next = next;
             this._log = log;
-            this._options = options;
         }
 
         /// <summary>Invokes the middleware for given request context.</summary>
@@ -35,9 +32,6 @@ namespace TehGM.Discord.Interactions.AspNetCore
         /// <returns></returns>
         public Task InvokeAsync(HttpContext context)
         {
-            if (!this._options.CurrentValue.HandlePings)
-                return this._next.Invoke(context);
-
             JObject json = context.Features.Get<IDiscordInteractionReaderFeature>().InteractionJson;
 
             // if type == 1, respond with pong

@@ -216,9 +216,9 @@ public class DiscordInteractionsController : ControllerBase
 
 ## Customizing
 ### Interactions Routes
-By default, the middlewares will be configured to only work when a request is made to `/api/discord/interactions`. You can change that when adding Discord Interactions Middlewares.
+By default, the middlewares will be configured to only work when a request is made to `/api/discord/interactions`. You can change that when adding Interactions services.
 ```csharp
-app.UseDiscordInteractions(options =>
+services.AddDiscordInteractions(options =>
 {
     // remove default route
     options.Routes.Clear();
@@ -233,16 +233,16 @@ You can add as many routes as you want. Note that it'll run signature verificati
 
 If you wish, you can also enable the middlewares for all routes in your application by setting `Routes` property to null.
 ```csharp
-app.UseDiscordInteractions(options =>
+services.AddDiscordInteractions(options =>
 {
     options.Routes = null;
 });
 ```
 
 #### Route Case Sensitivity
-Route matching is case insensitive by default, as `Routes` collection is a [HashSet using `StringComparer.OrdinalIgnoreCase`](Discord.Interactions.AspNetCore/Middlewares/DiscordInteractionsMiddlewareOptions.cs). If you wish to change that, replace entire `Routes` collection.
+Route matching is case insensitive by default, as `Routes` collection is a [HashSet using `StringComparer.OrdinalIgnoreCase`](Discord.Interactions.AspNetCore/DiscordInteractionsOptions.cs). If you wish to change that, replace entire `Routes` collection.
 ```csharp
-app.UseDiscordInteractions(options =>
+services.AddDiscordInteractions(options =>
 {
     // change to case-sensitive invariant culture matching
     options.Routes = new HashSet<string>(StringComparer.InvariantCulture);
@@ -251,13 +251,37 @@ app.UseDiscordInteractions(options =>
 });
 ```
 
+#### Per-route Config
+Middlewares support named options, so if you want to for example use different `PublicKey` for each route, you can configure multiple [named options](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-5.0#named-options-support-using-iconfigurenamedoptions) instances, and then enable middlewares using options name.
+
+```csharp
+services.Configure<DiscordInteractionsOptions>("App1", options =>
+{
+    options.PublicKey = "app1_public-key";
+    options.Routes.Clear();
+    options.Routes.Add("/app1/api/discord/interactions");
+});
+services.Configure<DiscordInteractionsOptions>("App2", options =>
+{
+    options.PublicKey = "app2_public-key";
+    options.Routes.Clear();
+    options.Routes.Add("/app2/api/discord/interactions");
+});
+```
+```csharp
+app.UseDiscordInteractions("App1");
+app.UseDiscordInteractions("App2");
+```
+
+Note that all services, including [command registration services](#registering-new-application-commands), still will use unnamed options.
+
 #### Custom Route Matching
 If you want to have full control of which routes the middlewares run on, you need to manually configure them by using ASP.NET Core's [`UseWhen` method](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-5.0#branch-the-middleware-pipeline-1). See [DiscordInteractionsMiddlewareExtensions.cs](Discord.Interactions.AspNetCore/DiscordInteractionsMiddlewareExtensions.cs#L34) to see which middlewares you'll need to register manually.
 
 ### Automatic Ping Handling
 `UseDiscordInteractions` by default automatically registers middleware that will handle [Discord Ping Interactions](https://discord.com/developers/docs/interactions/receiving-and-responding#receiving-an-interaction) for you. If you wish to disable it, set `HandlePings` property to false:
 ```csharp
-app.UseDiscordInteractions(options =>
+services.AddDiscordInteractions(options =>
 {
     options.HandlePings = false;
 });

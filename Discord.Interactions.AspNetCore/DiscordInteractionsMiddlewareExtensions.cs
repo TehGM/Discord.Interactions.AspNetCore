@@ -13,12 +13,19 @@ namespace Microsoft.AspNetCore.Builder
         /// <param name="app">The <see cref="IApplicationBuilder"/>.</param>
         /// <returns>The <see cref="IApplicationBuilder"/>.</returns>
         public static IApplicationBuilder UseDiscordInteractions(this IApplicationBuilder app)
+            => UseDiscordInteractions(app, null);
+
+        /// <summary>Adds Discord Interactions middlewares to the pipeline.</summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/>.</param>
+        /// <param name="optionsName">Name of named options to use.</param>
+        /// <returns>The <see cref="IApplicationBuilder"/>.</returns>
+        public static IApplicationBuilder UseDiscordInteractions(this IApplicationBuilder app, string optionsName)
         {
             if (app == null)
                 throw new ArgumentNullException(nameof(app));
 
-            IOptionsMonitor<DiscordInteractionsOptions> optionsService = app.ApplicationServices.GetService<IOptionsMonitor<DiscordInteractionsOptions>>();
-            DiscordInteractionsOptions options = optionsService.CurrentValue;
+            IOptionsMonitor<DiscordInteractionsOptions> optionsService = app.ApplicationServices.GetRequiredService<IOptionsMonitor<DiscordInteractionsOptions>>();
+            DiscordInteractionsOptions options = optionsName == null ? optionsService.CurrentValue : optionsService.Get(optionsName);
 
             // if routes are null, use on all routes
             if (options.Routes == null)
@@ -36,7 +43,7 @@ namespace Microsoft.AspNetCore.Builder
                 throw new ArgumentNullException(nameof(app));
 
             app.UseMiddleware<DiscordInteractionReaderMiddleware>();
-            app.UseMiddleware<DiscordSignatureVerificationMiddleware>();
+            app.UseMiddleware<DiscordSignatureVerificationMiddleware>(options);
             if (options.HandlePings)
                 app.UseMiddleware<DiscordPingHandlingMiddleware>(); 
             app.UseMiddleware<DiscordInteractionCommandsMiddleware>();
