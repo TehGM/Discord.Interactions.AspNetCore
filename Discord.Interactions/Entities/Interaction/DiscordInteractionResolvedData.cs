@@ -7,6 +7,7 @@ namespace TehGM.Discord.Interactions
     /// <seealso href="https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data-structure"/>
     public class DiscordInteractionResolvedData
     {
+#pragma warning disable CS0649 // unassigned warning
         [JsonProperty("users", NullValueHandling = NullValueHandling.Ignore)]
         private Dictionary<ulong, DiscordUser> _users;
         [JsonProperty("members", NullValueHandling = NullValueHandling.Ignore)]
@@ -17,6 +18,7 @@ namespace TehGM.Discord.Interactions
         private Dictionary<ulong, DiscordRole> _roles;
         [JsonProperty("channels", NullValueHandling = NullValueHandling.Ignore)]
         private Dictionary<ulong, DiscordChannel> _channels;
+#pragma warning restore CS0649
 
         /// <summary>the ids and User objects</summary>
         [JsonIgnore]
