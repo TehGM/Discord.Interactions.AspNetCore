@@ -17,7 +17,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 5.0.201
     - name: Exclude example projects
       run: dotnet sln remove Examples/**
     - name: Install dependencies
@@ -39,8 +39,10 @@ jobs:
         dotnet-version: 3.1.101
     - name: Exclude example projects
       run: dotnet sln remove Examples/**
+    # don't run tests in .NET Core 3 as test project targets .NET 5
+    - name: Exclude test projects
+      run: dotnet sln remove **/*.Tests.csproj
     - name: Install dependencies
       run: dotnet restore
     - name: Build solution
       run: dotnet build --configuration Release --no-restore
-    # don't run tests in .NET Core 3 as test project targets .NET 5
