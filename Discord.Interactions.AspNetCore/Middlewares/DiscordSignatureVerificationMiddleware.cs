@@ -17,8 +17,8 @@ namespace TehGM.Discord.Interactions.AspNetCore
     public class DiscordSignatureVerificationMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IOptionsMonitor<DiscordInteractionsOptions> _options;
         private readonly ILogger _log;
+        private readonly IOptionsMonitor<DiscordInteractionsOptions> _options;
 
         /// <summary>Creates an instance of the middleware.</summary>
         /// <param name="next">Delegate to the next middleware.</param>
