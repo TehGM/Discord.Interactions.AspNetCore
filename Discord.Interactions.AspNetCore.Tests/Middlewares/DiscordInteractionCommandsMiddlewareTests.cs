@@ -19,7 +19,8 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
     {
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IDiscordInteractionCommandHandlerProvider, TestInteractionCommandsProvider>();
+            services.AddScoped<DiscordInteractionCommandsMiddleware>();
+            services.AddScoped<IDiscordInteractionCommandHandlerProvider, TestInteractionCommandsProvider>();
         }
 
         protected override void Configure(IApplicationBuilder app)
@@ -68,10 +69,6 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
                     return new TestInteractionCommand();
                 return null;
             }
-
-            public void AddCommand(ulong commandID, IDiscordInteractionCommandHandler handler) => throw new NotImplementedException();
-            public bool RemoveCommand(ulong commandID) => throw new NotImplementedException();
-            public void Clear() => throw new NotImplementedException();
         }
 
         private class TestInteractionCommand : IDiscordInteractionCommandHandler

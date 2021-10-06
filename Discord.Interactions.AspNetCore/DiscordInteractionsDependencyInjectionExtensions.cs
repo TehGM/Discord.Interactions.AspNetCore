@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.Discord.Interactions;
+using TehGM.Discord.Interactions.AspNetCore;
 using TehGM.Discord.Interactions.AspNetCore.Authentication;
 using TehGM.Discord.Interactions.CommandsHandling;
 using TehGM.Discord.Interactions.CommandsHandling.Registration;
@@ -30,6 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IDiscordInteractionCommandHandlerFactory, DiscordInteractionCommandHandlerFactory>();
             services.TryAddSingleton<DiscordInteractionCommandHandlerCache>();
             services.TryAddScoped<IDiscordInteractionCommandHandlerProvider, DiscordInteractionCommandHandlerProvider>();
+            services.AddScoped<DiscordInteractionCommandsMiddleware>();
 
             // application commands
             services.AddHttpClient<IDiscordHttpClient, DiscordHttpClient>();
