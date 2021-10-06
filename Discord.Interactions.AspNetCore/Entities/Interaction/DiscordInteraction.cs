@@ -24,10 +24,12 @@ namespace TehGM.Discord.Interactions
         /// <summary>the channel it was sent from</summary>
         [JsonProperty("channel_id", NullValueHandling = NullValueHandling.Ignore)]
         public ulong? ChannelID { get; private set; }
-        /// <summary>guild member data for the invoking user, including permissions</summary>
+        /// <summary>Guild member data for the invoking user. This will be null if <see cref="User"/> is not null.</summary>
+        /// <seealso cref="GetUser"/>
         [JsonProperty("member", NullValueHandling = NullValueHandling.Ignore)]
         public DiscordGuildMember GuildMember { get; private set; }
-        /// <summary>user object for the invoking user, if invoked in a DM</summary>
+        /// <summary>User object for the invoking user, if invoked in a DM. Will be null if invoked in guild. Use <see cref="GetUser"/> for safe retrieval.</summary>
+        /// <seealso cref="GetUser"/>
         [JsonProperty("user", NullValueHandling = NullValueHandling.Ignore)]
         public DiscordUser User { get; private set; }
         /// <summary>a continuation token for responding to the interaction</summary>
@@ -44,5 +46,13 @@ namespace TehGM.Discord.Interactions
         /// <remarks>This constructor exists for JSON deserialization.</remarks>
         [JsonConstructor]
         protected DiscordInteraction() { }
+
+        /// <summary>Safely gets user object regardless if it's a guild member or not.</summary>
+        /// <returns>Discord user object.</returns>
+        /// <seealso cref="User"/>
+        /// <seealso cref="GuildMember"/>
+        /// <seealso cref="DiscordGuildMember.User"/>
+        public DiscordUser GetUser()
+            => this.User ?? this.GuildMember?.User;
     }
 }

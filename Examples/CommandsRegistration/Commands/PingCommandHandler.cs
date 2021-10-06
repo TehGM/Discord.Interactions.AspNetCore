@@ -14,8 +14,8 @@ namespace TehGM.Discord.Interactions.Examples.CommandsRegistration
     {
         public async Task<DiscordInteractionResponse> InvokeAsync(DiscordInteraction message, HttpRequest request, CancellationToken cancellationToken)
         {
-            // unfortunately Discord provides user in a messy way, so we need to check both user and guild member
-            DiscordUser user = message.User ?? message.GuildMember.User;
+            // use GetUser to get user object independent if the command was invoked from DM or Guild
+            DiscordUser user = message.GetUser();
 
             // use the builder to simplify the creation of response
             return new DiscordInteractionResponseBuilder()
