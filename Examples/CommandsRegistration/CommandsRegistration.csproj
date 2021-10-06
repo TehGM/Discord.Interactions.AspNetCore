@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>Examples.CommandsRegistration</AssemblyName>
+    <RootNamespace>TehGM.Discord.Interactions.Examples.CommandsRegistration</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Discord.Interactions.AspNetCore\Discord.Interactions.AspNetCore.csproj" />
+  </ItemGroup>
+
+
+</Project>
