@@ -26,6 +26,7 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
                 ctx.Features.Set<IDiscordInteractionReaderFeature>(feature));
 
             Assert.AreEqual((int)HttpStatusCode.OK, context.Response.StatusCode);
+            Assert.AreEqual("application/json", context.Response.Headers["Content-Type"]);
         }
 
         [Test]

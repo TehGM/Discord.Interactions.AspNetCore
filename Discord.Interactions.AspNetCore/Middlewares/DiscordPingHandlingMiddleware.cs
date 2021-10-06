@@ -38,6 +38,7 @@ namespace TehGM.Discord.Interactions.AspNetCore
             {
                 this._log.LogDebug("Discord interaction ping received, returning pong");
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
+                context.Response.Headers.Add("Content-Type", "application/json");
                 return context.Response.WriteAsync(
                     JObject.FromObject(DiscordInteractionResponse.Pong).ToString(Formatting.None),
                     context.RequestAborted);
