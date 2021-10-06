@@ -36,9 +36,9 @@ namespace TehGM.Discord
         /// <seealso href="https://discord.com/developers/docs/reference#image-formatting"/>
         [JsonProperty("banner", NullValueHandling = NullValueHandling.Ignore)]
         public string BannerHash { get; private set; }
-        /// <summary>the user's banner color encoded as an integer representation of hexadecimal color code</summary>
+        /// <summary>The user's banner color.</summary>
         [JsonProperty("accent_color", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? BannerColor { get; private set; }
+        public DiscordColor? BannerColor { get; private set; }
         /// <summary>the user's chosen language option</summary>
         [JsonProperty("locale", NullValueHandling = NullValueHandling.Ignore)]
         public string Language { get; private set; }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,6 +54,7 @@ namespace TehGM.Discord.Interactions.Examples.CommandsRegistration
                     response.AddEmbed(embed =>
                     {
                         embed.WithDescription(text);
+                        embed.WithColor(Color.Aqua);
                     });
                 }
                 else

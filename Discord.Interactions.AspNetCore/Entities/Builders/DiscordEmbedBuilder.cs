@@ -18,7 +18,7 @@ namespace TehGM.Discord
         /// <summary>timestamp of embed content</summary>
         public DateTimeOffset? Timestamp { get; set; }
         /// <summary>color code of the embed</summary>
-        public int? Color { get; set; }
+        public DiscordColor? Color { get; set; }
         /// <summary>Footer information.</summary>
         public DiscordEmbedFooter Footer { get; set; }
         /// <summary>Image information.</summary>
@@ -69,7 +69,7 @@ namespace TehGM.Discord
         /// <summary>Sets color of the embed.</summary>
         /// <param name="color">Embed color.</param>
         /// <returns>Current builder.</returns>
-        public DiscordEmbedBuilder WithColor(int? color)
+        public DiscordEmbedBuilder WithColor(DiscordColor? color)
             => this.Modify(embed => embed.Color = color);
 
         /// <summary>Sets timestamp of the embed.</summary>

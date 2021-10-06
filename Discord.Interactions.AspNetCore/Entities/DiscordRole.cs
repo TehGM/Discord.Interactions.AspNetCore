@@ -12,9 +12,9 @@ namespace TehGM.Discord
         /// <summary>Role name.</summary>
         [JsonProperty("name", Required = Required.Always)]
         public string Name { get; private set; }
-        /// <summary>integer representation of hexadecimal color code</summary>
+        /// <summary>Color of this role.</summary>
         [JsonProperty("color", Required = Required.Always)]
-        public int Color { get; private set; }
+        public DiscordColor Color { get; private set; }
         /// <summary>if this role is pinned in the user listing</summary>
         [JsonProperty("hoist", Required = Required.Always)]
         public bool IsPinned { get; private set; }

@@ -61,7 +61,7 @@ namespace TehGM.Discord
         public DateTimeOffset? Timestamp { get; set; }
         /// <summary>color code of the embed</summary>
         [JsonProperty("color", NullValueHandling = NullValueHandling.Ignore)]
-        public int? Color { get; set; }
+        public DiscordColor? Color { get; set; }
         /// <summary>Footer information.</summary>
         [JsonProperty("footer", NullValueHandling = NullValueHandling.Ignore)]
         public DiscordEmbedFooter Footer { get; set; }
