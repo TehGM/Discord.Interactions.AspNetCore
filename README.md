@@ -129,14 +129,15 @@ services.AddHostedService<RegisterMyCommands>();
 ### Registering new Application Commands
 The library will not load and register Application Commands by default. This is opt-in, as enabling this feature will overwrite all commands your application might've already registered with Discord.
 
-However, re-registering commands from the application can be useful if you only run a single instance of the application, as it'll ensure that all your commands are automatically updated and tracked. If you wish to enable this feature, set `RegisterCommands` option to true. Additionally, you'll also need to provide bot token and application ID. Both can be found on [Discord Developer Portal](https://discord.com/developers/applications).
+However, re-registering commands from the application can be useful if you only run a single instance of the application, as it'll ensure that all your commands are automatically updated and tracked. If you wish to enable this feature, set `RegisterCommands` option to true. Additionally, you'll also need to provide application ID and either [bearer token](https://discord.com/developers/docs/topics/oauth2#client-credentials-grant) or bot token. Both can be found on [Discord Developer Portal](https://discord.com/developers/applications).
 ```csharp
 services.AddDiscordInteractions(options =>
 {
     // opt-in to commands registration
     options.RegisterCommands = true;
     // these are required for registering commands
-    options.BotToken = "Discord Issued Bot Token";
+    options.BearerToken = "Discord Issued Bearer Token";
+    options.BotToken = "Discord Issued Bot Token";  // bot token is used only if BearerToken is not provided
     options.ApplicationID = "Discord Issued Application ID";
 });
 ```

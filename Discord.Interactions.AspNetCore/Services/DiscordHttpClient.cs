@@ -25,7 +25,12 @@ namespace TehGM.Discord.Interactions.Services
             this._options = options.Value;
 
             this.Client.DefaultRequestHeaders.Add("User-Agent", this._options.UserAgent);
-            this.Client.DefaultRequestHeaders.Add("Authorization", $"Bot {this._options.BotToken}");
+            if (!string.IsNullOrWhiteSpace(this._options.BearerToken))
+                this.Client.DefaultRequestHeaders.Add("Authorization", $"Bearer {this._options.BearerToken}");
+            else if (!string.IsNullOrWhiteSpace(this._options.BotToken))
+                this.Client.DefaultRequestHeaders.Add("Authorization", $"Bot {this._options.BotToken}");
+            else
+                throw new ArgumentException($"Please provide either {nameof(DiscordInteractionsOptions.BearerToken)} or {nameof(DiscordInteractionsOptions.BotToken)}", nameof(options));
         }
 
         /// <inheritdoc/>
