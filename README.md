@@ -70,7 +70,7 @@ public class PingCommandHandler : IDiscordInteractionCommandHandler
 {
     public async Task<DiscordInteractionResponse> InvokeAsync(DiscordInteraction message, HttpRequest request, CancellationToken cancellationToken)
     {
-        DiscordUser user = message.User ?? message.GuildMember.User;
+        DiscordUser user = message.GetUser();
         return new DiscordInteractionResponseBuilder()
             .WithText($"Pong! {DiscordFormatter.MentionUser(user.ID)}")
             .Build();
