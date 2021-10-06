@@ -28,7 +28,8 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
         public Task<DiscordApplicationCommand> BuildAsync(Type type, CancellationToken cancellationToken)
         {
             // try to use the builder method first
-            IEnumerable<MethodInfo> methods = type.GetMethods().Where(method =>
+            // bind instance methods as well, to do validation for the user
+            IEnumerable<MethodInfo> methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Where(method =>
                 !Attribute.IsDefined(method, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(method, typeof(InteractionCommandBuilderAttribute)));
             if (methods.Any())
             {
