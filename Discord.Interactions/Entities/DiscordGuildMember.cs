@@ -32,8 +32,10 @@ namespace TehGM.Discord
         /// <summary>whether the user is muted in voice channels</summary>
         [JsonProperty("mute")]
         public bool IsMuted { get; private set; }
+#pragma warning disable CS0649 // unassigned warning
         [JsonProperty("pending", NullValueHandling = NullValueHandling.Ignore)]
         private bool? _pending;
+#pragma warning restore CS0649
         /// <summary>whether the user has not yet passed the guild's Membership Screening requirements</summary>
         /// <seealso href="https://discord.com/developers/docs/resources/guild#membership-screening-object"/>
         [JsonIgnore]

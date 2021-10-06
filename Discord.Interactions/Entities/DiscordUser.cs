@@ -19,13 +19,17 @@ namespace TehGM.Discord
         /// <seealso href="https://discord.com/developers/docs/reference#image-formatting"/>
         [JsonProperty("avatar")]
         public string AvatarHash { get; private set; }
+#pragma warning disable CS0649 // unassigned warning
         [JsonProperty("bot", NullValueHandling = NullValueHandling.Ignore)]
         private bool? _bot;
+#pragma warning restore CS0649
         /// <summary>whether the user belongs to an OAuth2 application</summary>
         [JsonIgnore]
         public bool IsBot => this._bot == true;
+#pragma warning disable CS0649 // unassigned warning
         [JsonProperty("system", NullValueHandling = NullValueHandling.Ignore)]
         private bool? _system;
+#pragma warning restore CS0649
         /// <summary>whether the user is an Official Discord System user (part of the urgent message system)</summary>
         [JsonIgnore]
         public bool IsSystem => this._system == true;
