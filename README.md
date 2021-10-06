@@ -17,7 +17,11 @@ Before starting, you need public key of your Discord application. You can get on
 Once you have it, either add it to your application configuration (see [Configuration in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-5.0)), or alternatively you can set it directly in code.
 
 ### Install the library
-Library will be available on nuget.org soon(tm).
+This library can be installed from [nuget.org](https://www.nuget.org/packages/TehGM.Discord.Interactions.AspNetCore/).
+
+```
+dotnet add package TehGM.Discord.Interactions.AspNetCore
+```
 
 Once library is installed, the library features can be accessed by adding following using directive:
 ```csharp
