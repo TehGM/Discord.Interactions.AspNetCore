@@ -15,6 +15,12 @@
     <PackageProjectUrl>https://github.com/TehGM/Discord.Interactions.AspNetCore</PackageProjectUrl>
     <PackageIcon>logo.png</PackageIcon>
     <PackageIconUrl />
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>Discord.Interactions.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
