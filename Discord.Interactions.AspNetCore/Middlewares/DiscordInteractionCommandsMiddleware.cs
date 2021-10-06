@@ -53,6 +53,7 @@ namespace TehGM.Discord.Interactions.AspNetCore
             this._log.LogDebug("Invoking command {ID}", commandID.Value);
             DiscordInteractionResponse response = await cmd.InvokeAsync(feature.Interaction, context.Request, context.RequestAborted).ConfigureAwait(false);
             context.Response.StatusCode = (int)HttpStatusCode.OK;
+            context.Response.Headers.Add("Content-Type", "application/json");
             await context.Response.WriteAsync(JObject.FromObject(response).ToString(Formatting.None), context.RequestAborted).ConfigureAwait(false);
         }
     }
