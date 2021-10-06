@@ -25,7 +25,7 @@ jobs:
     - name: Build solution
       run: dotnet build --configuration Release --no-restore
     - name: Run tests
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-restore --verbosity normal
       
   build-netcore3:
     runs-on: ubuntu-latest
@@ -43,5 +43,4 @@ jobs:
       run: dotnet restore
     - name: Build solution
       run: dotnet build --configuration Release --no-restore
-    - name: Run tests
-      run: dotnet test --no-build --verbosity normal
+    # don't run tests in .NET Core 3 as test project targets .NET 5
