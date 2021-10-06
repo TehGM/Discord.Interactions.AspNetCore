@@ -43,6 +43,9 @@ Add following code to your Configure method in Startup:
 app.UseDiscordInteractions();
 ```
 
+### Usage Examples
+Some examples of usage can be found in [Examples](Examples/) folder.
+
 ## Interaction Commands
 This library provides an system allowing you design your commands easily. These commands are called Interaction Commands.
 

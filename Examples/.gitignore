@@ -1,0 +1,6 @@
+# development appsettings
+appsettings.Development.json
+
+# all appsecrets
+appsecrets.json
+appsecrets.*.json
