@@ -8,12 +8,15 @@ namespace TehGM.Discord.Serialization
     /// <remarks>This class also contains non-JSON static converting methods.</remarks>
     public class UnixTimestampConverter : DateTimeConverterBase
     {
+        public static readonly DateTime _epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        public static readonly DateTimeOffset _epochOffset = new DateTimeOffset(_epoch);
+
         /// <summary>Converts provided date and time value to unix timestamp (in seconds).</summary>
         /// <param name="value">The value to convert to unix timestamp.</param>
         /// <returns>Unix timestamp (in seconds).</returns>
         public static long ToUnixTimestamp(DateTime value)
         {
-            double seconds = ((DateTime)value - DateTime.UnixEpoch).TotalSeconds;
+            double seconds = ((DateTime)value - _epoch).TotalSeconds;
             return (long)seconds;
         }
 
@@ -27,13 +30,13 @@ namespace TehGM.Discord.Serialization
         /// <param name="value">Unix timestamp (in seconds).</param>
         /// <returns>Date and time value.</returns>
         public static DateTime ToDateTime(long value)
-            => DateTime.UnixEpoch.AddSeconds(value);
+            => _epoch.AddSeconds(value);
 
         /// <summary>Converts provided unix timestamp (in seconds) to a date and time value.</summary>
         /// <param name="value">Unix timestamp (in seconds).</param>
         /// <returns>Date and time value.</returns>
         public static DateTimeOffset ToDateTimeOffset(long value)
-            => DateTimeOffset.UnixEpoch.AddSeconds(value);
+            => _epochOffset.AddSeconds(value);
 
         /// <inheritdoc/>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

@@ -60,10 +60,10 @@ namespace TehGM.Discord.Serialization
 
             T GetValue<T>(string propertyName)
             {
-                JsonPropertyMember m = members.FirstOrDefault(m => m.Name.Equals(propertyName, StringComparison.Ordinal));
-                if (m == null)
+                JsonPropertyMember member = members.FirstOrDefault(m => m.Name.Equals(propertyName, StringComparison.Ordinal));
+                if (member == null)
                     return default(T);
-                return m.GetValue<T>(value);
+                return member.GetValue<T>(value);
             }
             void AddIDs(string parseValue, string propertyName)
             {
