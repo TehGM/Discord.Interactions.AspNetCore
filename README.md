@@ -15,6 +15,11 @@ Once you have it, either add it to your application configuration (see [Configur
 ### Install the library
 Library will be available on nuget.org soon(tm).
 
+Once library is installed, the library features can be accessed by adding following using directive:
+```csharp
+using TehGM.Discord.Interactions;
+```
+
 ### Configure Services
 You need to configure a few services in your Startup: configure options, and also add Interactions Services and Interactions Authentication.
 ```csharp
