@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/TehGM/Discord.Interactions.AspNetCore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>discord aspnetcore interaction slash command</PackageTags>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageIcon>logo.png</PackageIcon>
@@ -21,6 +21,12 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageReleaseNotes>- Fixed missing documentation comments.
+- Fixed error log message on failure to register a guild command.
+- Added options validation.
+- DiscordInteractionCommandsRegistrar is now public.
+- Relaxed some dependencies.</PackageReleaseNotes>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
