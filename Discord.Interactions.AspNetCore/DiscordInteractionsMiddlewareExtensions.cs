@@ -15,7 +15,7 @@ namespace Microsoft.AspNetCore.Builder
         public static IApplicationBuilder UseDiscordInteractions(this IApplicationBuilder app)
             => UseDiscordInteractions(app, null);
 
-        /// <summary>Adds Discord Interactions middlewares to the pipeline.</summary>
+        /// <summary>Adds Discord Interactions middlewares to the pipeline. Should be called before UseRouting().</summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/>.</param>
         /// <param name="optionsName">Name of named options to use.</param>
         /// <returns>The <see cref="IApplicationBuilder"/>.</returns>
