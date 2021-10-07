@@ -22,7 +22,7 @@
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReleaseNotes>- Fixed missing documentation comments.
-- Fixed error log message on failure to register a guild command.
+- Fixed variable replacement in log message on guild command registration failure.
 - Added options validation.
 - DiscordInteractionCommandsRegistrar is now public.
 - Relaxed some dependencies.</PackageReleaseNotes>
