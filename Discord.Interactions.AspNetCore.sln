@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		LICENSE = LICENSE
+		NUGET_README.md = NUGET_README.md
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -21,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{85
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandsRegistration", "Examples\CommandsRegistration\CommandsRegistration.csproj", "{03D7484A-BDFE-40F3-8C8C-53694427347A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord.Interactions", "Discord.Interactions\Discord.Interactions.csproj", "{AEDD9877-28EB-4CE1-A1A0-1039D8744290}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Interactions", "Discord.Interactions\Discord.Interactions.csproj", "{AEDD9877-28EB-4CE1-A1A0-1039D8744290}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
