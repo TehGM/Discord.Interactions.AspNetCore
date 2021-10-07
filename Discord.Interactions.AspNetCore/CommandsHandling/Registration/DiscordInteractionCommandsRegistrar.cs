@@ -11,7 +11,8 @@ using Microsoft.Extensions.Options;
 
 namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
 {
-    class DiscordInteractionCommandsRegistrar : IHostedService
+    /// <summary>A service that handles registration of new Discord Application Commands.</summary>
+    public class DiscordInteractionCommandsRegistrar : IHostedService
     {
         private readonly ILogger _log;
         private readonly DiscordInteractionsOptions _options;
@@ -20,6 +21,13 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
         private readonly IDiscordInteractionCommandHandlerFactory _factory;
         private readonly IDiscordInteractionCommandBuilder _builder;
 
+        /// <summary>Creates a new instance of the service.</summary>
+        /// <param name="log">Used for logging registration events.</param>
+        /// <param name="options">Options for registration.</param>
+        /// <param name="services">Service provider that can be used when injecting dependencies.</param>
+        /// <param name="loader">Service loading command handlers from assemblies.</param>
+        /// <param name="factory">Factory for command handlers.</param>
+        /// <param name="builder">Service that builds commands.</param>
         public DiscordInteractionCommandsRegistrar(ILogger<DiscordInteractionCommandsRegistrar> log, IOptions<DiscordInteractionsOptions> options, IServiceProvider services,
             IDiscordInteractionCommandsLoader loader, IDiscordInteractionCommandHandlerFactory factory, IDiscordInteractionCommandBuilder builder)
         {
@@ -166,7 +174,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
         /// <summary>Compound key for Discord Application Command.</summary>
         /// <remarks>Until commands are actually registered with Discord Servers, their ID will be unknown. Name alone isn't good enough either, as commands with 
         /// same name can be of different type. This struct combines name and type into a single key that can be used in dictionaries during registration lookups.</remarks>
-        public struct CommandKey : IEquatable<CommandKey>
+        private struct CommandKey : IEquatable<CommandKey>
         {
             public string Name { get; }
             public DiscordApplicationCommandType Type { get; }
