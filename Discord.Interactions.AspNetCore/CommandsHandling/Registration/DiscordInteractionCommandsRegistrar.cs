@@ -150,21 +150,16 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
                     this._log.LogDebug("Registered command {Name} with ID {ID}", registeredCmd.Name, registeredCmd.ID);
                 }
             }
-            catch (Exception ex) when (this.LogAsError(ex, GetExceptionMessage(ex))) { }
+            catch (Exception ex) when (LogRegistrationException(ex)) { }
 
-            string GetExceptionMessage(Exception ex)
+            bool LogRegistrationException(Exception exception)
             {
-                string exMsg = "Failed registering Discord Application commands";
-                if (guildID != null)
-                    exMsg += " for guild ID {GuildID}";
-                return exMsg;
+                if (guildID == null)
+                    this._log.LogError(exception, "Failed registering Discord Application commands");
+                else
+                    this._log.LogError(exception, "Failed registering Discord Application commands for guild ID {GuildID}", guildID);
+                return true;
             }
-        }
-
-        private bool LogAsError(Exception exception, string message, params object[] args)
-        {
-            this._log.LogError(exception, message, args);
-            return true;
         }
 
         /// <inheritdoc/>
