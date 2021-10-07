@@ -16,5 +16,7 @@ Before running the example, you need to provide valid values to the configuratio
 Once the config is updated, simply run the example from Visual Studio.
 
 Interaction commands require that you specify endpoint URL for your application on [Discord Developer Portal](https://discord.com/developers/applications). You should do it while the example application is already running, as Discord will try to validate the endpoint.  
-I recommend using [ngrok](https://ngrok.com/) or get URL that will securely tunnel to your application.  
-Example endpoint URL would be `https://51a4-193-104-143-9.ngrok.io/api/discord/interactions`.
+I recommend using [ngrok](https://ngrok.com/) or get URL that will securely tunnel to your application.
+
+When ngrok is installed, and example application is running, open cmd and run `ngrok http 5444`.  
+Example endpoint URL would be something like `https://51a4-193-104-143-9.ngrok.io/api/discord/interactions` - which is what you'll need to put into [Discord Developer Portal](https://discord.com/developers/applications).

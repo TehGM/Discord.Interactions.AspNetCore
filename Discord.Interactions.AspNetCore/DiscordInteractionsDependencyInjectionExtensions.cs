@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using TehGM.Discord.Interactions;
 using TehGM.Discord.Interactions.AspNetCore;
 using TehGM.Discord.Interactions.AspNetCore.Authentication;
@@ -24,6 +25,8 @@ namespace Microsoft.Extensions.DependencyInjection
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
+            // options
+            services.TryAddSingleton<IValidateOptions<DiscordInteractionsOptions>, DiscordInteractionsOptionsValidator>();
             if (configureOptions != null)
                 services.Configure(configureOptions);
 
