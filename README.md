@@ -56,6 +56,8 @@ Add following code to your Configure method in Startup:
 app.UseDiscordInteractions();
 ```
 
+> Note: `app.UseDiscordInteractions();` should be called ***before*** `app.UseRouting();`.
+
 ### Usage Examples
 Some examples of usage can be found in [Examples](Examples) folder.
 
