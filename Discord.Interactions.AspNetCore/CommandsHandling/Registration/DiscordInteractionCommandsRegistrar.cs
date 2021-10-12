@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
 {
     /// <summary>A service that handles registration of new Discord Application Commands.</summary>
-    public class DiscordInteractionCommandsRegistrar : IHostedService
+    public class DiscordInteractionCommandsRegistrar : IDiscordInteractionCommandsRegistrar, IHostedService
     {
         private readonly ILogger _log;
         private readonly DiscordInteractionsOptions _options;
