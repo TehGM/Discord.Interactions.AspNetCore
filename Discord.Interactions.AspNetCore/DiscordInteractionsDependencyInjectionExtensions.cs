@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IDiscordInteractionCommandHandlerFactory, DiscordInteractionCommandHandlerFactory>();
             services.TryAddSingleton<DiscordInteractionCommandHandlerCache>();
             services.TryAddScoped<IDiscordInteractionCommandHandlerProvider, DiscordInteractionCommandHandlerProvider>();
-            services.AddScoped<DiscordInteractionCommandsMiddleware>();
+            services.TryAddScoped<DiscordInteractionCommandsMiddleware>();
 
             // application commands
             services.AddHttpClient<IDiscordHttpClient, DiscordHttpClient>();
