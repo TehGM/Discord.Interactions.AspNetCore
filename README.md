@@ -340,7 +340,7 @@ public class MyCustomCommandsRegistrar : DiscordInteractionCommandsRegistrar, ID
             // ignore commands with [GuildInteractionCommand] attribute (default behaviour)
             type.GetCustomAttribute<GuildInteractionCommandAttribute>() == null
             // also ignore commands with our custom attribute
-            && type.GetCustomAttribute<TestCommandHandler>() == null);
+            && type.GetCustomAttribute<TestInteractionCommandAttribute>() == null);
     }
 
     // handle our custom attribute as an additional command type
@@ -348,7 +348,7 @@ public class MyCustomCommandsRegistrar : DiscordInteractionCommandsRegistrar, ID
     {
         // grab handlers with our custom attribute
         IEnumerable<TypeInfo> handlerTypes = allHandlerTypes
-            .Where(type => type.GetCustomAttribute<TestCommandHandler>() != null)
+            .Where(type => type.GetCustomAttribute<TestInteractionCommandAttribute>() != null)
         if (handlerTypes?.Any() != true)
             return Task.CompletedTask;
 
