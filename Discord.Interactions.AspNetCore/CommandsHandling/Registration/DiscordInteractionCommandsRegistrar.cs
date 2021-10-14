@@ -62,23 +62,18 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
             if (!commandTypes.Any())
                 return;
 
-            // service scope will be used for HTTP Client only
-            using IServiceScope scope = this.Services.CreateScope();
-            IDiscordApplicationCommandsClient client = scope.ServiceProvider.GetRequiredService<IDiscordApplicationCommandsClient>();
-
             // perform registration
-            await this.RegisterGlobalCommandsAsync(client, commandTypes, cancellationToken).ConfigureAwait(false);
-            await this.RegisterGuildCommandsAsync(client, commandTypes, cancellationToken).ConfigureAwait(false);
-            await this.RegisterAdditionalCommandsAsync(client, commandTypes, cancellationToken).ConfigureAwait(false);
+            await this.RegisterGlobalCommandsAsync(commandTypes, cancellationToken).ConfigureAwait(false);
+            await this.RegisterGuildCommandsAsync(commandTypes, cancellationToken).ConfigureAwait(false);
+            await this.RegisterAdditionalCommandsAsync(commandTypes, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Allows to register additional commands, that might've been filtered out. Called after Global and Guild commands registration.</summary>
         /// <remarks>Default filtering logic will register all commands before calling this method. This method is meant to be used when overriding <see cref="GetGlobalHandlerTypes(IEnumerable{TypeInfo})"/> and/or <see cref="GetGuildHandlerTypes(IEnumerable{TypeInfo})"/>.</remarks>
-        /// <param name="client">HTTP Client to use for commands registration.</param>
         /// <param name="allHandlerTypes">All command handler types found when loading.</param>
         /// <param name="cancellationToken">Token for operation cancellation.</param>
         /// <returns>Asynchronous task.</returns>
-        protected virtual Task RegisterAdditionalCommandsAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> allHandlerTypes, CancellationToken cancellationToken)
+        protected virtual Task RegisterAdditionalCommandsAsync(IEnumerable<TypeInfo> allHandlerTypes, CancellationToken cancellationToken)
             => Task.CompletedTask;
 
         /// <summary>Filters command handler types, returning only ones that are global.</summary>
@@ -109,7 +104,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
         protected virtual IEnumerable<ulong> GetGuildIDs(TypeInfo handlerType)
             => handlerType.GetCustomAttribute<GuildInteractionCommandAttribute>().GuildIDs;
 
-        private Task RegisterGlobalCommandsAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> handlerTypes, CancellationToken cancellationToken)
+        private Task RegisterGlobalCommandsAsync(IEnumerable<TypeInfo> handlerTypes, CancellationToken cancellationToken)
         {
             // filter out guild commands
             handlerTypes = this.GetGlobalHandlerTypes(handlerTypes);
@@ -117,10 +112,10 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
                 return Task.CompletedTask;
 
             this.Log.LogDebug("Registering global Discord Application commands");
-            return this.BuildAndRegisterCommandsAsync(client, handlerTypes, null, cancellationToken);
+            return this.BuildAndRegisterCommandsAsync(handlerTypes, null, cancellationToken);
         }
 
-        private async Task RegisterGuildCommandsAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> handlerTypes, CancellationToken cancellationToken)
+        private async Task RegisterGuildCommandsAsync(IEnumerable<TypeInfo> handlerTypes, CancellationToken cancellationToken)
         {
             // filter out commands that don't have guild command attribute
             handlerTypes = this.GetGuildHandlerTypes(handlerTypes);
@@ -141,18 +136,17 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
                 IEnumerable<TypeInfo> guildCommandTypes = handlerTypes.Where(type => this.GetGuildIDs(type).Contains(gid));
 
                 // register them
-                await this.BuildAndRegisterCommandsAsync(client, guildCommandTypes, gid, cancellationToken).ConfigureAwait(false);
+                await this.BuildAndRegisterCommandsAsync(guildCommandTypes, gid, cancellationToken).ConfigureAwait(false);
             }
         }
 
         /// <summary>Builds and registers specified commands.</summary>
-        /// <remarks>Call this method when overriding <see cref="RegisterAdditionalCommandsAsync(IDiscordApplicationCommandsClient, IEnumerable{TypeInfo}, CancellationToken)"/>.</remarks>
-        /// <param name="client">HTTP Client to use for commands registration.</param>
+        /// <remarks>Call this method when overriding <see cref="RegisterAdditionalCommandsAsync(IEnumerable{TypeInfo}, CancellationToken)"/>.</remarks>
         /// <param name="handlerTypes">Types of handlers to load commands from.</param>
         /// <param name="guildID">ID of the guild. Null for global commands.</param>
         /// <param name="cancellationToken">Token for operation cancellation.</param>
         /// <returns>Asynchronous task.</returns>
-        protected async Task BuildAndRegisterCommandsAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> handlerTypes, ulong? guildID, CancellationToken cancellationToken)
+        protected async Task BuildAndRegisterCommandsAsync(IEnumerable<TypeInfo> handlerTypes, ulong? guildID, CancellationToken cancellationToken)
         {
             if (handlerTypes?.Any() != true)
                 return;
@@ -176,6 +170,10 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
                 commandNames.Add(CommandKey.FromCommand(builtCmd), descriptor);
                 this.Log.LogTrace("Built Discord Application command: {Name}", builtCmd.Name);
             }
+
+            // resolve client. Use scope to limit client's lifetime
+            using IServiceScope scope = this.Services.CreateScope();
+            IDiscordApplicationCommandsClient client = scope.ServiceProvider.GetRequiredService<IDiscordApplicationCommandsClient>();
 
             try
             {
