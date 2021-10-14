@@ -24,7 +24,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
         /// <inheritdoc/>
         /// <summary>Builds the command by invoking method marked with <see cref="InteractionCommandBuilderAttribute"/> or using <see cref="InteractionCommandAttribute"/>.</summary>
         /// <param name="cancellationToken">Cancellation token that will be passed to the build method.</param>
-        /// <param name="type">Type to look for attributes in.</param>
+        /// <param name="type">Handler type to look for attributes in.</param>
         public Task<DiscordApplicationCommand> BuildAsync(Type type, CancellationToken cancellationToken)
         {
             // try to use the builder method first

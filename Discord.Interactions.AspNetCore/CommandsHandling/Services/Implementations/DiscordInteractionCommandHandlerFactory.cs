@@ -22,7 +22,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
         }
 
         /// <inheritdoc/>
-        public IDiscordInteractionCommandHandler CreateCommand(ServiceDescriptor handlerDescriptor, IServiceProvider services)
+        public IDiscordInteractionCommandHandler CreateHandler(ServiceDescriptor handlerDescriptor, IServiceProvider services)
         {
             if (handlerDescriptor == null)
                 throw new ArgumentNullException(nameof(handlerDescriptor));

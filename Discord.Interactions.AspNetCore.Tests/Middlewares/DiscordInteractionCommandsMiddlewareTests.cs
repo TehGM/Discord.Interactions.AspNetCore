@@ -64,7 +64,7 @@ namespace TehGM.Discord.Interactions.AspNetCore.Tests
 
         private class TestInteractionCommandsProvider : IDiscordInteractionCommandHandlerProvider
         {
-            public IDiscordInteractionCommandHandler GetCommand(ulong commandID)
+            public IDiscordInteractionCommandHandler GetHandler(ulong commandID)
             {
                 if (commandID == 1234)
                     return new TestInteractionCommand();
