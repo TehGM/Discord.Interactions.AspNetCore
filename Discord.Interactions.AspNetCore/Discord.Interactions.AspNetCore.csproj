@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/TehGM/Discord.Interactions.AspNetCore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>discord aspnetcore interaction slash command</PackageTags>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageIcon>logo.png</PackageIcon>
@@ -22,11 +22,11 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>- Fixed missing documentation comments.
-- Fixed variable replacement in log message on guild command registration failure.
-- Added options validation.
-- DiscordInteractionCommandsRegistrar is now public.
-- Relaxed some dependencies.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Added IDiscordInteractionCommandsRegistrar interface;
+- Added multiple protected and virtual methods to DiscordInteractionCommandsRegistrar;
+- Renamed some (mostly internal docs) uses of "command" with "handler";
+- DiscordAllowedMentions now has [JsonConverter(typeof(DiscordAllowedMentionsConverter))] attribute;
+- DiscordInteractionCommandsMiddleware now will only be registered once.</PackageReleaseNotes>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
   </PropertyGroup>
 
