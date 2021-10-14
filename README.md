@@ -307,7 +307,7 @@ services.AddDiscordInteractions(options =>
 
 Note that if you do this, you will need to manually handle these interactions in your controller.
 
-### Custom CommandInstance Attributes
+### Custom Command Handler Attributes
 [IDiscordInteractionCommandsRegistrar](Discord.Interactions.AspNetCore/CommandsHandling/Registration/DiscordInteractionCommandsRegistrar.cs) is the service used for registering commands with Discord. By default, it'll perform 2 steps - register all global commands, and register all guild commands. This is usually enough, however you might want to change how attributes are interpreted.
 
 Imagine that you create a new attribute for test guild-only commands, and you want ID of the test guild to come from options.
