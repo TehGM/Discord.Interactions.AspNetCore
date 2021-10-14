@@ -14,9 +14,13 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
     /// <summary>A service that handles registration of new Discord Application Commands.</summary>
     public class DiscordInteractionCommandsRegistrar : IDiscordInteractionCommandsRegistrar, IHostedService
     {
-        private readonly ILogger _log;
-        private readonly DiscordInteractionsOptions _options;
-        private readonly IServiceProvider _services;
+        /// <summary>Logger that can be used to log messages.</summary>
+        protected ILogger Log { get; }
+        /// <summary>Options used when registering commands.</summary>
+        protected DiscordInteractionsOptions Options { get; }
+        /// <summary>Service provider used when registering commands.</summary>
+        protected IServiceProvider Services { get; }
+
         private readonly IDiscordInteractionCommandsLoader _loader;
         private readonly IDiscordInteractionCommandHandlerFactory _factory;
         private readonly IDiscordInteractionCommandBuilder _builder;
@@ -31,9 +35,9 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
         public DiscordInteractionCommandsRegistrar(ILogger<DiscordInteractionCommandsRegistrar> log, IOptions<DiscordInteractionsOptions> options, IServiceProvider services,
             IDiscordInteractionCommandsLoader loader, IDiscordInteractionCommandHandlerFactory factory, IDiscordInteractionCommandBuilder builder)
         {
-            this._log = log;
-            this._options = options.Value;
-            this._services = services;
+            this.Log = log;
+            this.Options = options.Value;
+            this.Services = services;
             this._loader = loader;
             this._factory = factory;
             this._builder = builder;
@@ -42,72 +46,113 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
         /// <inheritdoc/>
         async Task IHostedService.StartAsync(CancellationToken cancellationToken)
         {
-            if (!this._options.RegisterCommands)
+            if (!this.Options.RegisterCommands)
             {
-                this._log.LogDebug("Registering Discord Application Commands is disabled");
+                this.Log.LogDebug("Registering Discord Application Commands is disabled");
                 return;
             }
 
-            this._log.LogInformation("Registering Discord Application Commands");
-            this._log.LogTrace("Loading types implementing {Type} from assemblies", nameof(IDiscordInteractionCommandHandler));
+            this.Log.LogInformation("Registering Discord Application Commands");
+            this.Log.LogTrace("Loading types implementing {Type} from assemblies", nameof(IDiscordInteractionCommandHandler));
             List<TypeInfo> commandTypes = new List<TypeInfo>();
-            foreach (Assembly asm in this._options.CommandAssemblies)
+            foreach (Assembly asm in this.Options.CommandAssemblies)
                 commandTypes.AddRange(this._loader.LoadFromAssembly(asm));
 
-            this._log.LogDebug("{Count} types implementing {Type} interface loaded from assemblies", commandTypes.Count, nameof(IDiscordInteractionCommandHandler));
+            this.Log.LogDebug("{Count} types implementing {Type} interface loaded from assemblies", commandTypes.Count, nameof(IDiscordInteractionCommandHandler));
             if (!commandTypes.Any())
                 return;
 
             // service scope will be used for HTTP Client only
-            using IServiceScope scope = this._services.CreateScope();
+            using IServiceScope scope = this.Services.CreateScope();
             IDiscordApplicationCommandsClient client = scope.ServiceProvider.GetRequiredService<IDiscordApplicationCommandsClient>();
 
             // perform registration
             await this.RegisterGlobalCommandsAsync(client, commandTypes, cancellationToken).ConfigureAwait(false);
             await this.RegisterGuildCommandsAsync(client, commandTypes, cancellationToken).ConfigureAwait(false);
+            await this.RegisterAdditionalCommandsAsync(client, commandTypes, cancellationToken).ConfigureAwait(false);
         }
+
+        /// <summary>Allows to register additional commands, that might've been filtered out. Called after Global and Guild commands registration.</summary>
+        /// <remarks>Default filtering logic will register all commands before calling this method. This method is meant to be used when overriding <see cref="GetGlobalHandlerTypes(IEnumerable{TypeInfo})"/> and/or <see cref="GetGuildHandlerTypes(IEnumerable{TypeInfo})"/>.</remarks>
+        /// <param name="client">HTTP Client to use for commands registration.</param>
+        /// <param name="allHandlerTypes">All command handler types found when loading.</param>
+        /// <param name="cancellationToken">Token for operation cancellation.</param>
+        /// <returns>Asynchronous task.</returns>
+        protected virtual Task RegisterAdditionalCommandsAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> allHandlerTypes, CancellationToken cancellationToken)
+            => Task.CompletedTask;
+
+        /// <summary>Filters command handler types, returning only ones that are global.</summary>
+        /// <param name="allHandlerTypes">All command handler types found when loading.</param>
+        /// <returns>Command handler types that are global commands.</returns>
+        /// <seealso cref="GetGuildHandlerTypes(IEnumerable{TypeInfo})"/>
+        protected virtual IEnumerable<TypeInfo> GetGlobalHandlerTypes(IEnumerable<TypeInfo> allHandlerTypes)
+        {
+            return allHandlerTypes.Where(type =>
+                type.GetCustomAttribute<GuildInteractionCommandAttribute>() == null);
+        }
+
+        /// <summary>Filters command handler types, returning only ones that are guild.</summary>
+        /// <param name="allHandlerTypes">All command handler types found when loading.</param>
+        /// <returns>Command handler types that are guild commands.</returns>
+        /// <see cref="GetGlobalHandlerTypes(IEnumerable{TypeInfo})"/>
+        /// <see cref="GetGuildIDs(TypeInfo)"/>
+        protected virtual IEnumerable<TypeInfo> GetGuildHandlerTypes(IEnumerable<TypeInfo> allHandlerTypes)
+        {
+            return allHandlerTypes.Where(type =>
+                type.GetCustomAttribute<GuildInteractionCommandAttribute>() != null);
+        }
+
+        /// <summary>Selects guild IDs to register command from handler type for.</summary>
+        /// <param name="handlerType">Type of the handler.</param>
+        /// <returns>Enumerable of guild IDs.</returns>
+        /// <seealso cref="GetGuildHandlerTypes(IEnumerable{TypeInfo})"/>
+        protected virtual IEnumerable<ulong> GetGuildIDs(TypeInfo handlerType)
+            => handlerType.GetCustomAttribute<GuildInteractionCommandAttribute>().GuildIDs;
 
         private Task RegisterGlobalCommandsAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> handlerTypes, CancellationToken cancellationToken)
         {
             // filter out guild commands
-            handlerTypes = handlerTypes.Where(type =>
-                type.GetCustomAttribute<GuildInteractionCommandAttribute>() == null);
+            handlerTypes = this.GetGlobalHandlerTypes(handlerTypes);
             if (handlerTypes?.Any() != true)
                 return Task.CompletedTask;
 
-            this._log.LogDebug("Registering global Discord Application commands");
-            return this.RegisterCommandsInternalAsync(client, handlerTypes, null, cancellationToken);
+            this.Log.LogDebug("Registering global Discord Application commands");
+            return this.BuildAndRegisterCommandsAsync(client, handlerTypes, null, cancellationToken);
         }
 
         private async Task RegisterGuildCommandsAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> handlerTypes, CancellationToken cancellationToken)
         {
             // filter out commands that don't have guild command attribute
-            handlerTypes = handlerTypes.Where(type => 
-                type.GetCustomAttribute<GuildInteractionCommandAttribute>() != null);
+            handlerTypes = this.GetGuildHandlerTypes(handlerTypes);
             if (handlerTypes?.Any() != true)
                 return;
 
             // select all guild IDs
-            IEnumerable<ulong> guildIDs = handlerTypes.SelectMany(type => 
-                type.GetCustomAttribute<GuildInteractionCommandAttribute>().GuildIDs).Distinct();
+            IEnumerable<ulong> guildIDs = handlerTypes.SelectMany(type => this.GetGuildIDs(type)).Distinct();
             if (guildIDs?.Any() != true)
                 return;
 
             foreach (ulong gid in guildIDs)
             {
-                using IDisposable logScope = this._log.BeginScope(new Dictionary<string, object> { { "GuildID", gid } });
-                this._log.LogDebug("Registering Discord Application commands for guild {GuildID}", gid);
+                using IDisposable logScope = this.Log.BeginScope(new Dictionary<string, object> { { "GuildID", gid } });
+                this.Log.LogDebug("Registering Discord Application commands for guild {GuildID}", gid);
 
                 // get commands only for given guild ID
-                IEnumerable<TypeInfo> guildCommandTypes = handlerTypes.Where(type => type
-                    .GetCustomAttribute<GuildInteractionCommandAttribute>().GuildIDs.Contains(gid));
+                IEnumerable<TypeInfo> guildCommandTypes = handlerTypes.Where(type => this.GetGuildIDs(type).Contains(gid));
 
                 // register them
-                await this.RegisterCommandsInternalAsync(client, guildCommandTypes, gid, cancellationToken).ConfigureAwait(false);
+                await this.BuildAndRegisterCommandsAsync(client, guildCommandTypes, gid, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private async Task RegisterCommandsInternalAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> handlerTypes, ulong? guildID, CancellationToken cancellationToken)
+        /// <summary>Builds and registers specified commands.</summary>
+        /// <remarks>Call this method when overriding <see cref="RegisterAdditionalCommandsAsync(IDiscordApplicationCommandsClient, IEnumerable{TypeInfo}, CancellationToken)"/>.</remarks>
+        /// <param name="client">HTTP Client to use for commands registration.</param>
+        /// <param name="handlerTypes">Types of handlers to load commands from.</param>
+        /// <param name="guildID">ID of the guild. Null for global commands.</param>
+        /// <param name="cancellationToken">Token for operation cancellation.</param>
+        /// <returns>Asynchronous task.</returns>
+        protected async Task BuildAndRegisterCommandsAsync(IDiscordApplicationCommandsClient client, IEnumerable<TypeInfo> handlerTypes, ulong? guildID, CancellationToken cancellationToken)
         {
             if (handlerTypes?.Any() != true)
                 return;
@@ -129,13 +174,13 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
 
                 // store result
                 commandNames.Add(CommandKey.FromCommand(builtCmd), descriptor);
-                this._log.LogTrace("Built Discord Application command: {Name}", builtCmd.Name);
+                this.Log.LogTrace("Built Discord Application command: {Name}", builtCmd.Name);
             }
 
             try
             {
                 // register commands with the client
-                this._log.LogTrace("Sending Discord request to register {Count} commands", builtCommands.Count);
+                this.Log.LogTrace("Sending Discord request to register {Count} commands", builtCommands.Count);
                 IEnumerable<DiscordApplicationCommand> results;
                 if (guildID != null)
                     results = await client.RegisterGuildCommandsAsync(guildID.Value, builtCommands, cancellationToken).ConfigureAwait(false);
@@ -147,19 +192,29 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
                 {
                     ServiceDescriptor descriptor = commandNames[CommandKey.FromCommand(registeredCmd)];
                     this._factory.AddDescriptor(registeredCmd.ID, descriptor);
-                    this._log.LogDebug("Registered command {Name} with ID {ID}", registeredCmd.Name, registeredCmd.ID);
+                    this.Log.LogDebug("Registered command {Name} with ID {ID}", registeredCmd.Name, registeredCmd.ID);
                 }
             }
-            catch (Exception ex) when (LogRegistrationException(ex)) { }
+            catch (Exception ex) when (OnException(ex)) { }
 
-            bool LogRegistrationException(Exception exception)
+            bool OnException(Exception exception)
             {
-                if (guildID == null)
-                    this._log.LogError(exception, "Failed registering Discord Application commands");
-                else
-                    this._log.LogError(exception, "Failed registering Discord Application commands for guild ID {GuildID}", guildID);
+                OnCommandsRegistrationFailed(exception, builtCommands, guildID);
                 return true;
             }
+        }
+
+        /// <summary>Called when there was an exception when registering commands.</summary>
+        /// <remarks>By default, this method logs the exception as error, including Guild ID in the log message.</remarks>
+        /// <param name="exception">Exception that has occured.</param>
+        /// <param name="commands">Commands that were attempted to be registered.</param>
+        /// <param name="guildID">ID of the guild where the commands were being registered. Null for global commands.</param>
+        protected virtual void OnCommandsRegistrationFailed(Exception exception, IEnumerable<DiscordApplicationCommand> commands, ulong? guildID)
+        {
+            if (guildID == null)
+                this.Log.LogError(exception, "Failed registering Discord Application commands");
+            else
+                this.Log.LogError(exception, "Failed registering Discord Application commands for guild ID {GuildID}", guildID);
         }
 
         /// <inheritdoc/>
