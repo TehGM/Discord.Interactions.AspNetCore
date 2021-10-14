@@ -307,6 +307,68 @@ services.AddDiscordInteractions(options =>
 
 Note that if you do this, you will need to manually handle these interactions in your controller.
 
+### Custom CommandInstance Attributes
+[IDiscordInteractionCommandsRegistrar](Discord.Interactions.AspNetCore/CommandsHandling/Registration/DiscordInteractionCommandsRegistrar.cs) is the service used for registering commands with Discord. By default, it'll perform 2 steps - register all global commands, and register all guild commands. This is usually enough, however you might want to change how attributes are interpreted.
+
+Imagine that you create a new attribute for test guild-only commands, and you want ID of the test guild to come from options.
+
+```csharp
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public TestInteractionCommandAttribute : Attribute { }
+
+[InteractionCommand("test", "Test-only command")]
+[TestInteractionCommand]
+public TestCommandHandler : IDiscordInteractionCommandHandler
+{
+    // ... handler code here ...
+}
+```
+
+You can create a new registrar class inheriting from [DiscordInteractionCommandsRegistrar](Discord.Interactions.AspNetCore/CommandsHandling/Registration/DiscordInteractionCommandsRegistrar.cs) and override a few methods to support this attribute:
+
+```csharp
+public class MyCustomCommandsRegistrar : DiscordInteractionCommandsRegistrar, IDiscordInteractionCommandsRegistrar
+{
+    // provide all dependencies to base class constructor
+    public DiscordInteractionCommandsRegistrar(ILogger<DiscordInteractionCommandsRegistrar> log, IOptions<DiscordInteractionsOptions> options, IServiceProvider services, IDiscordInteractionCommandsLoader loader, IDiscordInteractionCommandHandlerFactory factory, IDiscordInteractionCommandBuilder builder)
+        : base(log, options, services, loader, factory, builder) { }
+
+    // override filtering of global commands
+    protected override IEnumerable<TypeInfo> GetGlobalHandlerTypes(IEnumerable<TypeInfo> allHandlerTypes)
+    {
+        return allHandlerTypes.Where(type =>
+            // ignore commands with [GuildInteractionCommand] attribute (default behaviour)
+            type.GetCustomAttribute<GuildInteractionCommandAttribute>() == null
+            // also ignore commands with our custom attribute
+            && type.GetCustomAttribute<TestCommandHandler>() == null);
+    }
+
+    // handle our custom attribute as an additional command type
+    protected virtual Task RegisterAdditionalCommandsAsync(IEnumerable<TypeInfo> allHandlerTypes, CancellationToken cancellationToken)
+    {
+        // grab handlers with our custom attribute
+        IEnumerable<TypeInfo> handlerTypes = allHandlerTypes
+            .Where(type => type.GetCustomAttribute<TestCommandHandler>() != null)
+        if (handlerTypes?.Any() != true)
+            return Task.CompletedTask;
+
+        ulong testGuildID = // ... load from config, hardcode, whatever
+
+        // call base to perform registration
+        base.Log.LogDebug("Registering test-only Discord Application commands");
+        return base.BuildAndRegisterCommandsAsync(handlerTypes, testGuildID, cancellationToken);
+    }
+}
+```
+
+[DiscordInteractionCommandsRegistrar](Discord.Interactions.AspNetCore/CommandsHandling/Registration/DiscordInteractionCommandsRegistrar.cs) also provides a few other protected and virtual methods that you can use to customize behaviour.
+
+Make sure to register your custom `IDiscordInteractionCommandsRegistrar` in Startup:
+```csharp
+services.AddSingleton<IDiscordInteractionCommandsRegistrar, MyCustomCommandsRegistrar>();
+services.AddDiscordInteractions();
+```
+
 ## Development
 This library is to be considered as "beta". As such, features might be missing, and breaking changes might be introduced with any update.
 
