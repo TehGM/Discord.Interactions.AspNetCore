@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddTransient<IDiscordInteractionCommandBuilder, DiscordInteractionCommandBuilder>();
             services.TryAddTransient<IDiscordInteractionCommandsLoader, DiscordInteractionCommandsLoader>();
             services.TryAddTransient<IDiscordInteractionCommandsRegistrar, DiscordInteractionCommandsRegistrar>();
-            services.TryAddEnumerable(ServiceDescriptor.Transient<IHostedService>(provider => provider.GetRequiredService<IDiscordInteractionCommandsRegistrar>()));
+            services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<IDiscordInteractionCommandsRegistrar>());
 
             return services;
         }
