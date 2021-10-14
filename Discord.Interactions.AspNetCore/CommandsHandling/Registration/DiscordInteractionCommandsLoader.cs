@@ -23,7 +23,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
                 && !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute)) && typeof(IDiscordInteractionCommandHandler).IsAssignableFrom(t));
             if (!types.Any())
             {
-                _log?.LogWarning("Cannot load commands from assembly {Name} - no non-static non-abstract non-generic classes implementing {Type} interface", assembly.FullName, nameof(IDiscordInteractionCommandHandler));
+                _log?.LogWarning("Cannot load command handlers from assembly {Name} - no non-static non-abstract non-generic classes implementing {Type} interface", assembly.FullName, nameof(IDiscordInteractionCommandHandler));
                 return Enumerable.Empty<TypeInfo>();
             }
 

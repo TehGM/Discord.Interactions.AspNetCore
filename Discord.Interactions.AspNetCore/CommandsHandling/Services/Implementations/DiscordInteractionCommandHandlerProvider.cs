@@ -8,33 +8,33 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
     /// To resolve singleton ones, it uses singleton cache <see cref="DiscordInteractionCommandHandlerCache"/>.</remarks>
     public class DiscordInteractionCommandHandlerProvider : IDiscordInteractionCommandHandlerProvider, IDisposable
     {
-        private readonly DiscordInteractionCommandHandlerCache _singletonCommands;
-        private readonly DiscordInteractionCommandHandlerCache _scopedCommands;
+        private readonly DiscordInteractionCommandHandlerCache _singletonHandlers;
+        private readonly DiscordInteractionCommandHandlerCache _scopedHandlers;
         private readonly IDiscordInteractionCommandHandlerFactory _factory;
         private readonly IServiceProvider _services;
         private readonly object _lock = new object();
 
         /// <summary>Initializes a new provider for the scope.</summary>
         /// <param name="services">Services provider for creating command handler instances that have non-singleton lifetime.</param>
-        /// <param name="factory">Commands factory for creating command handler instances.</param>
-        /// <param name="singletonCommands">Cache of singleton-lifetime commands.</param>
-        public DiscordInteractionCommandHandlerProvider(IServiceProvider services, IDiscordInteractionCommandHandlerFactory factory, DiscordInteractionCommandHandlerCache singletonCommands)
+        /// <param name="factory">Handler factory for creating command handler instances.</param>
+        /// <param name="singletonHandlers">Cache of singleton-lifetime hand;ers.</param>
+        public DiscordInteractionCommandHandlerProvider(IServiceProvider services, IDiscordInteractionCommandHandlerFactory factory, DiscordInteractionCommandHandlerCache singletonHandlers)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
-            if (singletonCommands == null)
-                throw new ArgumentNullException(nameof(singletonCommands));
+            if (singletonHandlers == null)
+                throw new ArgumentNullException(nameof(singletonHandlers));
 
             this._services = services;
             this._factory = factory;
-            this._singletonCommands = singletonCommands;
-            this._scopedCommands = new DiscordInteractionCommandHandlerCache(services);
+            this._singletonHandlers = singletonHandlers;
+            this._scopedHandlers = new DiscordInteractionCommandHandlerCache(services);
         }
 
         /// <inheritdoc/>
-        public IDiscordInteractionCommandHandler GetCommand(ulong commandID)
+        public IDiscordInteractionCommandHandler GetHandler(ulong commandID)
         {
             lock (this._lock)
             {
@@ -44,26 +44,26 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
 
                 // transient services - simplest case. Just create and return
                 if (descriptor.Lifetime == ServiceLifetime.Transient)
-                    return this._factory.CreateCommand(descriptor, this._services);
+                    return this._factory.CreateHandler(descriptor, this._services);
                 // scoped services - check cache first, otherwise create, cache and return
                 if (descriptor.Lifetime == ServiceLifetime.Scoped)
-                    return this.GetOrCreateCommand(commandID, descriptor, this._scopedCommands);
+                    return this.GetOrCreateHandler(commandID, descriptor, this._scopedHandlers);
                 // singleton services - similar to scoped ones, but use singleton cache instead of local scoped one
                 if (descriptor.Lifetime == ServiceLifetime.Singleton)
-                    return this.GetOrCreateCommand(commandID, descriptor, this._singletonCommands);
+                    return this.GetOrCreateHandler(commandID, descriptor, this._singletonHandlers);
 
                 throw new InvalidOperationException($"Service lifetime {descriptor.Lifetime} is not supported.");
             }
         }
 
-        private IDiscordInteractionCommandHandler GetOrCreateCommand(ulong commandID, ServiceDescriptor descriptor, DiscordInteractionCommandHandlerCache cache)
+        private IDiscordInteractionCommandHandler GetOrCreateHandler(ulong commandID, ServiceDescriptor descriptor, DiscordInteractionCommandHandlerCache cache)
         {
             if (cache == null)
                 throw new ArgumentNullException(nameof(cache));
 
             if (cache.TryGetValue(commandID, out IDiscordInteractionCommandHandler result))
                 return result;
-            result = this._factory.CreateCommand(descriptor, cache.Services);
+            result = this._factory.CreateHandler(descriptor, cache.Services);
             if (result != null)
                 cache.Add(commandID, result);
             return result;
@@ -73,7 +73,7 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Services
         public void Dispose()
         {
             lock (this._lock)
-                this._scopedCommands?.Dispose();
+                this._scopedHandlers?.Dispose();
         }
     }
 }

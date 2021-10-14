@@ -9,6 +9,7 @@ namespace TehGM.Discord
     /// <summary>Discord allowed mentions object.</summary>
     /// <remarks>Do NOT serialize manually. Use <see cref="DiscordAllowedMentionsConverter"/>, which will handle any invalid state of the object.</remarks>
     /// <seealso href="https://discord.com/developers/docs/resources/channel#allowed-mentions-object"/>
+    [JsonConverter(typeof(DiscordAllowedMentionsConverter))]
     public class DiscordAllowedMentions
     {
         /// <summary>Allow all mentions.</summary>

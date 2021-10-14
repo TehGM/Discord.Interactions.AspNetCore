@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using TehGM.Discord.Interactions;
 using TehGM.Discord.Interactions.AspNetCore;
@@ -34,7 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IDiscordInteractionCommandHandlerFactory, DiscordInteractionCommandHandlerFactory>();
             services.TryAddSingleton<DiscordInteractionCommandHandlerCache>();
             services.TryAddScoped<IDiscordInteractionCommandHandlerProvider, DiscordInteractionCommandHandlerProvider>();
-            services.AddScoped<DiscordInteractionCommandsMiddleware>();
+            services.TryAddScoped<DiscordInteractionCommandsMiddleware>();
 
             // application commands
             services.AddHttpClient<IDiscordHttpClient, DiscordHttpClient>();
@@ -43,7 +44,8 @@ namespace Microsoft.Extensions.DependencyInjection
             // registration services
             services.TryAddTransient<IDiscordInteractionCommandBuilder, DiscordInteractionCommandBuilder>();
             services.TryAddTransient<IDiscordInteractionCommandsLoader, DiscordInteractionCommandsLoader>();
-            services.AddHostedService<DiscordInteractionCommandsRegistrar>();
+            services.TryAddTransient<IDiscordInteractionCommandsRegistrar, DiscordInteractionCommandsRegistrar>();
+            services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<IDiscordInteractionCommandsRegistrar>());
 
             return services;
         }

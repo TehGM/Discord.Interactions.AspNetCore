@@ -6,6 +6,6 @@
         /// <summary>Gets a command handler for a specific command ID.</summary>
         /// <param name="commandID">ID of the command. Must match Discord's command ID.</param>
         /// <returns>Command handler instance.</returns>
-        IDiscordInteractionCommandHandler GetCommand(ulong commandID);
+        IDiscordInteractionCommandHandler GetHandler(ulong commandID);
     }
 }

@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>TehGM.Discord.Interactions</RootNamespace>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <PackageId>TehGM.Discord.Interactions</PackageId>
     <Authors>TehGM</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -17,11 +17,14 @@
     <PackageIconUrl />
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>- Fixed missing documentation comments.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Renamed some (mostly internal or docs) uses of "command" with "handler";
+- DiscordAllowedMentions now has [JsonConverter(typeof(DiscordAllowedMentionsConverter))] attribute;
+- Compatibility patch for TehGM.Discord.Interactions.AspNetCore 0.1.2</PackageReleaseNotes>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
   </PropertyGroup>
 
@@ -31,6 +34,10 @@
 
   <ItemGroup>
     <None Include="..\logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\NUGET_README.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
