@@ -122,8 +122,13 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
             if (handlerTypes?.Any() != true)
                 return;
 
-            // select all guild IDs
-            IEnumerable<ulong> guildIDs = handlerTypes.SelectMany(type => this.GetGuildIDs(type)).Distinct();
+            // get guild IDs for each handler
+            IDictionary<TypeInfo, IEnumerable<ulong>> guildsPerHandler = new Dictionary<TypeInfo, IEnumerable<ulong>>(handlerTypes.Count());
+            foreach (TypeInfo type in handlerTypes)
+                guildsPerHandler.Add(type, this.GetGuildIDs(type));
+
+            // grab all guild IDs specified
+            IEnumerable<ulong> guildIDs = guildsPerHandler.SelectMany(pair => pair.Value).Distinct();
             if (guildIDs?.Any() != true)
                 return;
 
@@ -132,11 +137,13 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
                 using IDisposable logScope = this.Log.BeginScope(new Dictionary<string, object> { { "GuildID", gid } });
                 this.Log.LogDebug("Registering Discord Application commands for guild {GuildID}", gid);
 
-                // get commands only for given guild ID
-                IEnumerable<TypeInfo> guildCommandTypes = handlerTypes.Where(type => this.GetGuildIDs(type).Contains(gid));
+                // get handlers only for given guild ID
+                IEnumerable<TypeInfo> guildHandlerTypes = guildsPerHandler
+                    .Where(pair => pair.Value.Contains(gid))
+                    .Select(pair => pair.Key);
 
                 // register them
-                await this.BuildAndRegisterCommandsAsync(guildCommandTypes, gid, cancellationToken).ConfigureAwait(false);
+                await this.BuildAndRegisterCommandsAsync(guildHandlerTypes, gid, cancellationToken).ConfigureAwait(false);
             }
         }
 
