@@ -62,7 +62,7 @@ app.UseDiscordInteractions();
 Some examples of usage can be found in [Examples](Examples) folder.
 
 ## Interaction Commands
-This library provides an system allowing you design your commands easily. These commands are called Interaction Commands.
+This library provides a system allowing you design your commands easily. These commands are called Interaction Commands.
 
 The commands, or rather their handlers, are classes that implement [IDiscordInteractionCommandHandler](Discord.Interactions.AspNetCore/CommandsHandling/IDiscordInteractionCommandHandler.cs) interface. [IDiscordInteractionCommandHandler](Discord.Interactions.AspNetCore/CommandsHandling/IDiscordInteractionCommandHandler.cs) requires only one method, `InvokeAsync`, which will be called whenever your application receives the matching interaction command. You should return your response here, which will be sent back to Discord.  
 Note that implementation of this method should be lightweight, as Discord server will cancel the interaction after 3 seconds.
@@ -344,7 +344,7 @@ public class MyCustomCommandsRegistrar : DiscordInteractionCommandsRegistrar, ID
     }
 
     // handle our custom attribute as an additional command type
-    protected virtual Task RegisterAdditionalCommandsAsync(IEnumerable<TypeInfo> allHandlerTypes, CancellationToken cancellationToken)
+    protected override Task RegisterAdditionalCommandsAsync(IEnumerable<TypeInfo> allHandlerTypes, CancellationToken cancellationToken)
     {
         // grab handlers with our custom attribute
         IEnumerable<TypeInfo> handlerTypes = allHandlerTypes
