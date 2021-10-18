@@ -134,15 +134,14 @@ namespace TehGM.Discord.Interactions.CommandsHandling.Registration.Services
         /// <param name="returnedValue">The value returned by the method.</param>
         /// <param name="method">The method info.</param>
         /// <returns>Method's return value converted to <see cref="DiscordApplicationCommand"/>.</returns>
-        protected virtual async Task<DiscordApplicationCommand> HandleMethodReturnValue(object returnedValue, MethodInfo method)
+        protected virtual Task<DiscordApplicationCommand> HandleMethodReturnValue(object returnedValue, MethodInfo method)
         {
-            object result = returnedValue;
+            // if it's a task, return it as task
+            if (returnedValue is Task<DiscordApplicationCommand> taskResult)
+                return taskResult;
 
-            // if it's a task, await it
-            if (result is Task<DiscordApplicationCommand> taskResult)
-                result = await taskResult.ConfigureAwait(false);
-
-            return (DiscordApplicationCommand)result;
+            // otherwise, return as task result
+            return Task.FromResult((DiscordApplicationCommand)returnedValue);
         }
 
         /// <summary>Builds command from the attribute on the class.</summary>
