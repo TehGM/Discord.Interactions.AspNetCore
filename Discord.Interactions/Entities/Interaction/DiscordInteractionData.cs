@@ -38,7 +38,7 @@ namespace TehGM.Discord.Interactions
         // OPTIONS RETRIEVAL
         private bool TryGetOption<T>(string key, out T value, Func<object, T> parser)
         {
-            DiscordInteractionDataOption option = this.Options.FirstOrDefault(o => o.Name.Equals(key, StringComparison.OrdinalIgnoreCase));
+            DiscordInteractionDataOption option = this.Options?.FirstOrDefault(o => o.Name.Equals(key, StringComparison.OrdinalIgnoreCase));
             if (option == null || option.Value == null)
             {
                 value = default;
